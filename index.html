@@ -6,7 +6,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <title>זירת החרב - קרב גלים וחנות (v1.5)</title>
+  <title>זירת החרב - קרב גלים וחנות (v1.6)</title>
   <style>
     * {
       box-sizing: border-box;
@@ -685,6 +685,43 @@
         min-width: 80px;
       }
     }
+    .screen-attack-btn {
+      position: absolute;
+      bottom: 25px;
+      right: 25px;
+      width: 86px;
+      height: 86px;
+      border-radius: 50%;
+      background: radial-gradient(circle, #ef4444, #b91c1c);
+      border: 3px solid rgba(255, 255, 255, 0.5);
+      box-shadow: 0 0 25px rgba(239, 68, 68, 0.7);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      cursor: pointer;
+      pointer-events: auto;
+      touch-action: manipulation;
+      user-select: none;
+      -webkit-user-select: none;
+      transition: transform 0.1s;
+      z-index: 50;
+    }
+    .screen-attack-btn:active {
+      transform: scale(0.9);
+      box-shadow: 0 0 10px rgba(239, 68, 68, 0.4);
+    }
+    .screen-attack-icon {
+      font-size: 32px;
+      line-height: 1;
+    }
+    .screen-attack-text {
+      font-size: 11px;
+      font-weight: 800;
+      margin-top: 2px;
+      letter-spacing: 0.5px;
+    }
   </style>
   <!-- Three.js from reliable CDN -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
@@ -723,7 +760,7 @@
         <div class="wave-title">גל קרב</div>
         <div id="wave-display" class="wave-number">1</div>
         <div id="enemies-remaining" class="wave-remaining">אויבים: 3</div>
-        <div style="font-size: 10px; color: #10b981; margin-top: 4px; font-weight: bold;">גרסה 1.5 ✔️</div>
+        <div style="font-size: 10px; color: #10b981; margin-top: 4px; font-weight: bold;">גרסה 1.6 ✔️</div>
       </div>
     </div>
 
@@ -736,17 +773,23 @@
       <p id="banner-sub">הבס את האנשים האדומים עם החרב שלך</p>
     </div>
 
-    <!-- Bottom Controls: ג'ויסטיק קומפקטי בצד שמאל (תזוזה בהחלקה לכל כיוון, חרב בלחיצה במרכז בלבד) -->
+    <!-- Bottom Controls: ג'ויסטיק קומפקטי בצד שמאל וכפתור חרב גדול בצד ימין -->
     <div class="controls-container">
       <div id="joystick-base" class="joystick-base" aria-label="בקר תזוזה וחרב">
         <span class="dir-arrow dir-up">▲</span>
         <span class="dir-arrow dir-down">▼</span>
         <span class="dir-arrow dir-left">◀</span>
         <span class="dir-arrow dir-right">▶</span>
-        <div id="joystick-knob" class="joystick-knob">⚔️</div>
+        <div id="joystick-knob" class="joystick-knob">🕹️</div>
       </div>
-      <div class="joystick-label">מרכז: חרב ⚔️ | החלקה: תזוזה 🏃</div>
+      <div class="joystick-label">החלקה: תזוזה 🏃 | לחיצה במסך: חרב ⚔️</div>
       <div class="pc-hints">הזזת המסך = שינוי זווית מצלמה 🎥</div>
+    </div>
+
+    <!-- כפתור חרב ייעודי וגדול בצד ימין -->
+    <div id="btn-screen-attack" class="screen-attack-btn" aria-label="מכת חרב">
+      <span class="screen-attack-icon">⚔️</span>
+      <span class="screen-attack-text">מכה</span>
     </div>
   </div>
 
@@ -767,7 +810,7 @@
         <button id="btn-start-shop" class="btn-action-shop">🛒 כניסה לחנות</button>
       </div>
 
-      <div style="font-size: 12px; color: #10b981; margin-top: 20px; font-weight: bold;">גרסה 1.5 ✔️ (כולל חנות ויכולת 360°)</div>
+      <div style="font-size: 12px; color: #10b981; margin-top: 20px; font-weight: bold;">גרסה 1.6 ✔️ (תיקון מכת מסך + כפתור חרב)</div>
     </div>
   </div>
 
@@ -1606,6 +1649,7 @@
         playerModel.swordTrail.rotation.z = playerModel.mesh.rotation.y - Math.PI * 0.4;
       }
 
+      const playerPos = playerModel.mesh.position;
       const has360 = Game.abilities.whirlwind360;
       if (has360) {
         spawnWhirlwindVFX(playerPos);
@@ -1860,10 +1904,19 @@
       joystickBase.addEventListener('pointerdown', onJoystickPointerDown);
     }
 
+    let screenTouchDownX = 0;
+    let screenTouchDownY = 0;
+    let screenTouchStartTime = 0;
+
     // Screen touch/drag: Controls camera view angle strictly without jumping!
     window.addEventListener('pointerdown', (e) => {
-      // Ignore if clicking joystick or buttons
-      if (e.target.closest('#joystick-base') || e.target.closest('button') || e.target.closest('#game-over-screen')) {
+      // Ignore if clicking joystick or buttons or active screens
+      if (e.target.closest('#joystick-base') || 
+          e.target.closest('#btn-screen-attack') || 
+          e.target.closest('button') || 
+          e.target.closest('#game-over-screen') || 
+          e.target.closest('#shop-modal') || 
+          e.target.closest('#start-screen')) {
         return;
       }
 
@@ -1873,6 +1926,9 @@
         cameraPointerId = e.pointerId;
         isDraggingScreen = true;
         screenDragMoved = false;
+        screenTouchDownX = e.clientX;
+        screenTouchDownY = e.clientY;
+        screenTouchStartTime = Date.now();
         lastScreenX = e.clientX;
         lastScreenY = e.clientY;
       }
@@ -1886,16 +1942,19 @@
 
       // 2. Camera drag only tracks its own pointer ID (prevents jumping when moving and attacking!)
       if (isDraggingScreen && e.pointerId === cameraPointerId) {
-        const deltaX = e.clientX - lastScreenX;
-        const deltaY = e.clientY - lastScreenY;
+        const totalDist = Math.hypot(e.clientX - screenTouchDownX, e.clientY - screenTouchDownY);
 
-        // Ignore erratic single-frame jumps (> 80px) to prevent teleportation
-        if (Math.abs(deltaX) < 80 && Math.abs(deltaY) < 80) {
-          if (Math.hypot(deltaX, deltaY) > 2) {
-            screenDragMoved = true;
+        // Only count as camera orbit drag if user actually moved finger (> 16px)
+        if (totalDist > 16) {
+          screenDragMoved = true;
+          const deltaX = e.clientX - lastScreenX;
+          const deltaY = e.clientY - lastScreenY;
+
+          // Ignore erratic single-frame jumps (> 80px) to prevent teleportation
+          if (Math.abs(deltaX) < 80 && Math.abs(deltaY) < 80) {
+            cameraYaw -= deltaX * 0.0055;
+            cameraPitch = Math.max(-0.35, Math.min(0.45, cameraPitch - deltaY * 0.0035));
           }
-          cameraYaw -= deltaX * 0.0055;
-          cameraPitch = Math.max(-0.35, Math.min(0.45, cameraPitch - deltaY * 0.0035));
         }
 
         lastScreenX = e.clientX;
@@ -1909,8 +1968,11 @@
       }
 
       if (isDraggingScreen && e.pointerId === cameraPointerId) {
-        // Quick tap without dragging: triggers sword strike
-        if (!screenDragMoved && (e.button === 0 || e.pointerType === 'touch')) {
+        const totalDist = Math.hypot(e.clientX - screenTouchDownX, e.clientY - screenTouchDownY);
+        const timeElapsed = Date.now() - screenTouchStartTime;
+
+        // Screen Tap: Tapping anywhere on the screen triggers sword attack!
+        if (!screenDragMoved || (totalDist < 25 && timeElapsed < 600)) {
           triggerSwordAttack();
         }
         isDraggingScreen = false;
@@ -1927,6 +1989,17 @@
         cameraPointerId = null;
       }
     });
+
+    // Dedicated Attack Button (Bottom Right)
+    const btnScreenAttack = document.getElementById('btn-screen-attack');
+    if (btnScreenAttack) {
+      btnScreenAttack.addEventListener('pointerdown', (e) => {
+        e.stopPropagation();
+        e.preventDefault();
+        SoundEngine.init();
+        triggerSwordAttack();
+      });
+    }
 
     // Restart button
     btnRestart.addEventListener('click', restartGame);
