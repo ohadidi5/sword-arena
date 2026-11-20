@@ -6,7 +6,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <title>זירת החרב - קרב גלים (v1.3)</title>
+  <title>זירת החרב - קרב גלים (v1.4)</title>
   <style>
     * {
       box-sizing: border-box;
@@ -413,7 +413,7 @@
         <div class="wave-title">גל קרב</div>
         <div id="wave-display" class="wave-number">1</div>
         <div id="enemies-remaining" class="wave-remaining">אויבים: 3</div>
-        <div style="font-size: 10px; color: #10b981; margin-top: 4px; font-weight: bold;">גרסה 1.3 ✔️</div>
+        <div style="font-size: 10px; color: #10b981; margin-top: 4px; font-weight: bold;">גרסה 1.4 ✔️</div>
       </div>
     </div>
 
@@ -1030,8 +1030,8 @@
         model: enemyModel,
         hp: CONFIG.ENEMY_MAX_HP,
         maxHp: CONFIG.ENEMY_MAX_HP,
-        speed: 3.4 + Math.min(Game.wave * 0.25, 2.5), // gets slightly faster in higher waves
-        attackCooldown: 0.8 + Math.random() * 0.4,
+        speed: (3.4 + Math.min(Game.wave * 0.25, 2.5)) * 1.15, // +15% faster red enemies
+        attackCooldown: 0, // ready to strike immediately upon reaching player!
         isDead: false,
         punchAnimationTime: 0
       };
@@ -1133,11 +1133,7 @@
             // Effects
             SoundEngine.playHitEnemy();
             spawnDamageText(enemyPos, CONFIG.PLAYER_DAMAGE, false);
-            spawnHitParticles(enemyPos, 0xef4444, 16);
-
-            // Knockback on hit
-            const knockbackDir = toEnemy.clone().multiplyScalar(1.2);
-            enemy.model.mesh.position.add(knockbackDir);
+            // No knockback: enemies do not fly backwards on hit
 
             // Check if enemy defeated
             if (enemy.hp <= 0) {
@@ -1588,6 +1584,7 @@
     function updateEnemies(dt) {
       const playerPos = playerModel.mesh.position;
 
+      // 1. Individual Enemy AI: Movement & Fast Attacks
       Game.enemies.forEach(enemy => {
         if (enemy.isDead) return;
         const mesh = enemy.model.mesh;
@@ -1598,21 +1595,25 @@
         const dz = playerPos.z - mesh.position.z;
         mesh.rotation.y = Math.atan2(dx, dz);
 
+        // Decrease attack cooldown continuously so attack is instantly ready upon reaching player
+        if (enemy.attackCooldown > 0) {
+          enemy.attackCooldown -= dt;
+        }
+
         // Move towards player if not in melee striking range
         if (distToPlayer > 1.8) {
           const moveDir = new THREE.Vector3(dx, 0, dz).normalize();
           mesh.position.addScaledVector(moveDir, enemy.speed * dt);
 
           // Enemy walking leg animation
-          const walkPhase = Date.now() * 0.012;
+          const walkPhase = Date.now() * 0.015;
           enemy.model.leftLeg.rotation.x = Math.sin(walkPhase) * 0.55;
           enemy.model.rightLeg.rotation.x = -Math.sin(walkPhase) * 0.55;
         } else {
-          // In range: punch / attack player!
-          enemy.attackCooldown -= dt;
+          // In range: punch player immediately and attack faster!
           if (enemy.attackCooldown <= 0) {
-            enemy.attackCooldown = 1.1 + Math.random() * 0.4;
-            enemy.punchAnimationTime = 0.3; // punch animation duration
+            enemy.attackCooldown = 0.55 + Math.random() * 0.25; // much faster attack cooldown (~0.65s)
+            enemy.punchAnimationTime = 0.2; // faster punch animation
             damagePlayer(CONFIG.ENEMY_DAMAGE); // 10 damage to player
           }
         }
@@ -1620,11 +1621,53 @@
         // Enemy punch animation
         if (enemy.punchAnimationTime > 0) {
           enemy.punchAnimationTime -= dt;
-          enemy.model.rightArmPivot.rotation.x = -Math.sin(enemy.punchAnimationTime * 12) * 1.5;
+          enemy.model.rightArmPivot.rotation.x = -Math.sin((enemy.punchAnimationTime / 0.2) * Math.PI) * 1.6;
         } else {
-          enemy.model.rightArmPivot.rotation.x = THREE.MathUtils.lerp(enemy.model.rightArmPivot.rotation.x, 0, 0.2);
+          enemy.model.rightArmPivot.rotation.x = THREE.MathUtils.lerp(enemy.model.rightArmPivot.rotation.x, 0, 0.25);
         }
       });
+
+      // 2. Separation Physics: Enemies never stack or overlap, they disperse and spread out
+      const MIN_SEPARATION = 1.4;
+      for (let i = 0; i < Game.enemies.length; i++) {
+        const e1 = Game.enemies[i];
+        if (e1.isDead) continue;
+        for (let j = i + 1; j < Game.enemies.length; j++) {
+          const e2 = Game.enemies[j];
+          if (e2.isDead) continue;
+          const p1 = e1.model.mesh.position;
+          const p2 = e2.model.mesh.position;
+          let sepX = p1.x - p2.x;
+          let sepZ = p1.z - p2.z;
+          let distSq = sepX * sepX + sepZ * sepZ;
+
+          if (distSq < 0.0001) {
+            sepX = (Math.random() - 0.5) * 0.2;
+            sepZ = (Math.random() - 0.5) * 0.2;
+            distSq = sepX * sepX + sepZ * sepZ;
+          }
+
+          if (distSq < MIN_SEPARATION * MIN_SEPARATION) {
+            const dist = Math.sqrt(distSq);
+            const overlap = (MIN_SEPARATION - dist) * 0.5;
+            const nx = sepX / dist;
+            const nz = sepZ / dist;
+            p1.x += nx * overlap;
+            p1.z += nz * overlap;
+            p2.x -= nx * overlap;
+            p2.z -= nz * overlap;
+          }
+        }
+
+        // Keep enemies within arena perimeter
+        const mesh = e1.model.mesh;
+        const maxArena = CONFIG.ARENA_RADIUS - 0.8;
+        const dCenter = Math.sqrt(mesh.position.x * mesh.position.x + mesh.position.z * mesh.position.z);
+        if (dCenter > maxArena) {
+          mesh.position.x = (mesh.position.x / dCenter) * maxArena;
+          mesh.position.z = (mesh.position.z / dCenter) * maxArena;
+        }
+      }
     }
 
     function updateParticles(dt) {
