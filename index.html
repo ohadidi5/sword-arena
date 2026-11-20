@@ -6,7 +6,37 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <title>זירת החרב - קרב גלים וחנות (v1.6)</title>
+  <title>זירת החרב - קרב גלים וחנות (v1.7)</title>
+  <script>
+    // AUTOMATIC AUTO-UPDATE & INSTANT CACHE-BUSTER ENGINE
+    const APP_VERSION = "1.7";
+    (function checkAutoUpdate() {
+      try {
+        const params = new URLSearchParams(window.location.search);
+        const currentV = params.get('v');
+
+        // Force reload with unique cache buster if version is missing or old
+        if (!currentV || currentV !== APP_VERSION) {
+          params.set('v', APP_VERSION);
+          params.set('_t', Date.now());
+          window.location.replace(window.location.pathname + '?' + params.toString());
+          return;
+        }
+
+        // Background check to version.json (never cached)
+        fetch('version.json?_t=' + Date.now(), { cache: 'no-store' })
+          .then(r => r.json())
+          .then(data => {
+            if (data && data.version && data.version !== APP_VERSION) {
+              params.set('v', data.version);
+              params.set('_t', Date.now());
+              window.location.replace(window.location.pathname + '?' + params.toString());
+            }
+          })
+          .catch(() => {});
+      } catch (e) {}
+    })();
+  </script>
   <style>
     * {
       box-sizing: border-box;
@@ -760,7 +790,7 @@
         <div class="wave-title">גל קרב</div>
         <div id="wave-display" class="wave-number">1</div>
         <div id="enemies-remaining" class="wave-remaining">אויבים: 3</div>
-        <div style="font-size: 10px; color: #10b981; margin-top: 4px; font-weight: bold;">גרסה 1.6 ✔️</div>
+        <div style="font-size: 10px; color: #10b981; margin-top: 4px; font-weight: bold;">גרסה 1.7 ✔️</div>
       </div>
     </div>
 
@@ -810,7 +840,10 @@
         <button id="btn-start-shop" class="btn-action-shop">🛒 כניסה לחנות</button>
       </div>
 
-      <div style="font-size: 12px; color: #10b981; margin-top: 20px; font-weight: bold;">גרסה 1.6 ✔️ (תיקון מכת מסך + כפתור חרב)</div>
+      <div style="display: flex; justify-content: center; align-items: center; gap: 8px; margin-top: 18px;">
+        <span style="font-size: 12px; color: #10b981; font-weight: bold;">גרסה 1.7 ✔️ (עדכון אוטומטי)</span>
+        <button id="btn-force-refresh" style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #94a3b8; border-radius: 8px; font-size: 11px; padding: 3px 8px; cursor: pointer;">🔄 רענן</button>
+      </div>
     </div>
   </div>
 
@@ -2614,7 +2647,43 @@
     document.getElementById('btn-buy-hp').addEventListener('click', () => buyPowerup('hp', 50));
     document.getElementById('btn-buy-dmg').addEventListener('click', () => buyPowerup('dmg', 70));
     document.getElementById('btn-buy-speed').addEventListener('click', () => buyPowerup('speed', 60));
-    document.getElementById('btn-buy-heal').addEventListener('click', () => buyPowerup('heal', 25));
+    // Force Refresh & Cache Clear
+    const btnForceRefresh = document.getElementById('btn-force-refresh');
+    if (btnForceRefresh) {
+      btnForceRefresh.addEventListener('click', () => {
+        if ('caches' in window) {
+          caches.keys().then(names => Promise.all(names.map(name => caches.delete(name)))).finally(() => {
+            const p = new URLSearchParams();
+            p.set('v', APP_VERSION);
+            p.set('_t', Date.now());
+            window.location.replace(window.location.pathname + '?' + p.toString());
+          });
+        } else {
+          const p = new URLSearchParams();
+          p.set('v', APP_VERSION);
+          p.set('_t', Date.now());
+          window.location.replace(window.location.pathname + '?' + p.toString());
+        }
+      });
+    }
+
+    // Automatic background update checker: notifies and auto-refreshes seamlessly!
+    setInterval(() => {
+      fetch('version.json?_t=' + Date.now(), { cache: 'no-store' })
+        .then(r => r.json())
+        .then(data => {
+          if (data && data.version && data.version !== APP_VERSION) {
+            showBanner('🔄 גרסה חדשה עודכנה!', 'מעדכן את המשחק אוטומטית...');
+            setTimeout(() => {
+              const p = new URLSearchParams();
+              p.set('v', data.version);
+              p.set('_t', Date.now());
+              window.location.replace(window.location.pathname + '?' + p.toString());
+            }, 1200);
+          }
+        })
+        .catch(() => {});
+    }, 15000);
 
     // Load saved coins and upgrades, then start render loop
     loadSavedData();
