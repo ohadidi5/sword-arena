@@ -6,7 +6,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <title>זירת החרב - קרב גלים (v1.4)</title>
+  <title>זירת החרב - קרב גלים וחנות (v1.5)</title>
   <style>
     * {
       box-sizing: border-box;
@@ -342,26 +342,318 @@
       font-weight: bold;
       color: #38bdf8;
     }
-    .btn-restart {
+    .screen-actions {
+      display: flex;
+      gap: 14px;
+      flex-wrap: wrap;
+      justify-content: center;
+      margin-top: 15px;
+    }
+    .btn-action-primary {
       background: linear-gradient(135deg, #10b981, #059669);
       color: white;
       border: none;
       font-family: inherit;
-      font-size: 22px;
+      font-size: 20px;
       font-weight: 800;
-      padding: 16px 48px;
+      padding: 15px 36px;
       border-radius: 35px;
       cursor: pointer;
       box-shadow: 0 10px 25px rgba(16, 185, 129, 0.4);
       transition: transform 0.15s, box-shadow 0.15s;
     }
-    .btn-restart:hover {
-      transform: scale(1.05);
-      box-shadow: 0 14px 30px rgba(16, 185, 129, 0.6);
-    }
-    .btn-restart:active {
+    .btn-action-primary:active {
       transform: scale(0.96);
     }
+    .btn-action-shop {
+      background: linear-gradient(135deg, #f59e0b, #d97706);
+      color: white;
+      border: none;
+      font-family: inherit;
+      font-size: 20px;
+      font-weight: 800;
+      padding: 15px 36px;
+      border-radius: 35px;
+      cursor: pointer;
+      box-shadow: 0 10px 25px rgba(245, 158, 11, 0.4);
+      transition: transform 0.15s, box-shadow 0.15s;
+    }
+    .btn-action-shop:active {
+      transform: scale(0.96);
+    }
+    .btn-shop-mini {
+      background: linear-gradient(135deg, #f59e0b, #d97706);
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-family: inherit;
+      font-size: 13px;
+      font-weight: bold;
+      padding: 6px 14px;
+      cursor: pointer;
+      box-shadow: 0 3px 10px rgba(245, 158, 11, 0.3);
+    }
+    .btn-shop-mini:active {
+      transform: scale(0.94);
+    }
+
+    /* Start Screen */
+    #start-screen {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(8, 10, 15, 0.88);
+      backdrop-filter: blur(12px);
+      z-index: 90;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: #fff;
+      text-align: center;
+      padding: 20px;
+    }
+    #start-screen.active {
+      display: flex;
+      animation: fadeIn 0.4s ease-out;
+    }
+    .start-card {
+      background: rgba(255, 255, 255, 0.05);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      padding: 30px 35px;
+      border-radius: 24px;
+      box-shadow: 0 20px 50px rgba(0, 0, 0, 0.6);
+      max-width: 420px;
+      width: 90%;
+    }
+    .game-logo {
+      font-size: 52px;
+      margin-bottom: 8px;
+      animation: pulseLogo 2s infinite ease-in-out;
+    }
+    @keyframes pulseLogo {
+      0%, 100% { transform: scale(1); }
+      50% { transform: scale(1.1); }
+    }
+    .start-title {
+      font-size: 40px;
+      font-weight: 900;
+      color: #38bdf8;
+      text-shadow: 0 0 25px rgba(56, 189, 248, 0.5);
+      margin-bottom: 6px;
+    }
+    .start-sub {
+      color: #94a3b8;
+      font-size: 16px;
+      margin-bottom: 20px;
+    }
+    .gold-box {
+      background: rgba(245, 158, 11, 0.12);
+      border: 1px solid rgba(245, 158, 11, 0.3);
+      padding: 12px 20px;
+      border-radius: 14px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 17px;
+      margin-bottom: 22px;
+    }
+    .gold-box strong {
+      color: #fbbf24;
+      font-size: 20px;
+      font-weight: 800;
+    }
+
+    /* Shop Modal */
+    #shop-modal {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(6, 8, 12, 0.85);
+      backdrop-filter: blur(14px);
+      z-index: 150;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 16px;
+    }
+    #shop-modal.active {
+      display: flex;
+      animation: fadeIn 0.3s ease-out;
+    }
+    .shop-container {
+      background: #0f172a;
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 24px;
+      width: 100%;
+      max-width: 520px;
+      max-height: 88vh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      box-shadow: 0 25px 60px rgba(0, 0, 0, 0.8), 0 0 40px rgba(245, 158, 11, 0.15);
+    }
+    .shop-header {
+      padding: 18px 22px;
+      background: rgba(255, 255, 255, 0.03);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .shop-header h2 {
+      font-size: 22px;
+      color: #fbbf24;
+      font-weight: 800;
+    }
+    .shop-balance {
+      font-size: 17px;
+      font-weight: bold;
+      color: #fbbf24;
+      background: rgba(245, 158, 11, 0.15);
+      padding: 4px 12px;
+      border-radius: 20px;
+      border: 1px solid rgba(245, 158, 11, 0.3);
+    }
+    .btn-close-shop {
+      background: rgba(255, 255, 255, 0.1);
+      border: none;
+      color: white;
+      font-size: 20px;
+      width: 38px;
+      height: 38px;
+      border-radius: 50%;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: background 0.2s;
+    }
+    .btn-close-shop:hover {
+      background: rgba(239, 68, 68, 0.4);
+    }
+    .shop-tabs {
+      display: flex;
+      border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+      background: rgba(0, 0, 0, 0.25);
+    }
+    .shop-tab {
+      flex: 1;
+      padding: 14px;
+      background: none;
+      border: none;
+      color: #94a3b8;
+      font-family: inherit;
+      font-size: 16px;
+      font-weight: bold;
+      cursor: pointer;
+      position: relative;
+      transition: color 0.2s;
+    }
+    .shop-tab.active {
+      color: #38bdf8;
+    }
+    .shop-tab.active::after {
+      content: '';
+      position: absolute;
+      bottom: 0;
+      left: 10%;
+      right: 10%;
+      height: 3px;
+      background: #38bdf8;
+      border-radius: 3px;
+    }
+    .shop-content {
+      padding: 16px;
+      overflow-y: auto;
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .shop-tab-pane {
+      display: none;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .shop-tab-pane.active {
+      display: flex;
+    }
+    .shop-item-card {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 16px;
+      padding: 14px 16px;
+      display: flex;
+      align-items: center;
+      gap: 14px;
+      transition: border-color 0.2s, background 0.2s;
+    }
+    .shop-item-card:hover {
+      border-color: rgba(56, 189, 248, 0.3);
+      background: rgba(255, 255, 255, 0.06);
+    }
+    .item-icon-box {
+      font-size: 32px;
+      min-width: 52px;
+      height: 52px;
+      background: rgba(255, 255, 255, 0.05);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+    .item-details {
+      flex: 1;
+      text-align: right;
+    }
+    .item-title {
+      font-size: 16px;
+      font-weight: bold;
+      color: #f1f5f9;
+      margin-bottom: 3px;
+    }
+    .item-desc {
+      font-size: 12px;
+      color: #94a3b8;
+      line-height: 1.35;
+    }
+    .btn-buy {
+      background: linear-gradient(135deg, #f59e0b, #d97706);
+      color: white;
+      border: none;
+      border-radius: 14px;
+      font-family: inherit;
+      font-size: 14px;
+      font-weight: 800;
+      padding: 10px 18px;
+      cursor: pointer;
+      min-width: 100px;
+      box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+      transition: transform 0.15s, opacity 0.15s;
+    }
+    .btn-buy:active {
+      transform: scale(0.95);
+    }
+    .btn-buy.owned {
+      background: rgba(16, 185, 129, 0.25);
+      border: 1px solid rgba(16, 185, 129, 0.5);
+      color: #10b981;
+      box-shadow: none;
+      cursor: default;
+    }
+    .btn-buy.cant-afford {
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      color: #64748b;
+      box-shadow: none;
+      cursor: not-allowed;
+    }
+
     /* Mobile tweaks */
     @media (max-width: 600px) {
       .action-btn {
@@ -378,10 +670,19 @@
         display: none;
       }
       .player-stats {
-        min-width: 180px;
+        min-width: 160px;
       }
       .wave-badge {
-        min-width: 110px;
+        min-width: 90px;
+      }
+      .shop-item-card {
+        padding: 10px 12px;
+        gap: 10px;
+      }
+      .btn-buy {
+        padding: 8px 12px;
+        font-size: 13px;
+        min-width: 80px;
       }
     }
   </style>
@@ -400,7 +701,7 @@
       <div class="hud-card player-stats">
         <div class="player-label">
           <span>לוחם חסר פנים</span>
-          <span style="color: #38bdf8; font-size: 12px;">חרב: 10 נזק</span>
+          <span id="player-dmg-label" style="color: #38bdf8; font-size: 12px;">חרב: 10 נזק</span>
         </div>
         <div class="hp-bar-container">
           <div id="player-hp-fill" class="hp-bar-fill"></div>
@@ -408,12 +709,21 @@
         </div>
       </div>
 
+      <!-- Coins and Shop in HUD -->
+      <div class="hud-card" style="min-width: 140px; display: flex; flex-direction: column; gap: 4px; justify-content: center;">
+        <div style="display: flex; align-items: center; justify-content: space-between; gap: 8px;">
+          <div style="font-size: 17px; font-weight: 800; color: #fbbf24;">🪙 <span id="hud-coin-count">0</span></div>
+          <button id="btn-hud-shop" class="btn-shop-mini">חנות 🛒</button>
+        </div>
+        <div id="hud-ability-tag" style="font-size: 10px; color: #38bdf8; font-weight: bold; display: none;">🌪️ מכה 360° פעילה</div>
+      </div>
+
       <!-- Wave Counter -->
       <div class="hud-card wave-badge">
         <div class="wave-title">גל קרב</div>
         <div id="wave-display" class="wave-number">1</div>
         <div id="enemies-remaining" class="wave-remaining">אויבים: 3</div>
-        <div style="font-size: 10px; color: #10b981; margin-top: 4px; font-weight: bold;">גרסה 1.4 ✔️</div>
+        <div style="font-size: 10px; color: #10b981; margin-top: 4px; font-weight: bold;">גרסה 1.5 ✔️</div>
       </div>
     </div>
 
@@ -440,14 +750,118 @@
     </div>
   </div>
 
-  <!-- Game Over Screen -->
+  <!-- Start Screen (לפני תחילת משחק) -->
+  <div id="start-screen" class="active">
+    <div class="start-card">
+      <div class="game-logo">⚔️</div>
+      <h1 class="start-title">זירת החרב</h1>
+      <p class="start-sub">קרב גלים בהילוך איטי | אסוף 10 מטבעות על כל אויב</p>
+      
+      <div class="gold-box">
+        <span>מטבעות זהב שברשותך:</span>
+        <strong id="start-gold-count">🪙 0</strong>
+      </div>
+
+      <div class="screen-actions">
+        <button id="btn-start-game" class="btn-action-primary">⚔️ התחל משחק</button>
+        <button id="btn-start-shop" class="btn-action-shop">🛒 כניסה לחנות</button>
+      </div>
+
+      <div style="font-size: 12px; color: #10b981; margin-top: 20px; font-weight: bold;">גרסה 1.5 ✔️ (כולל חנות ויכולת 360°)</div>
+    </div>
+  </div>
+
+  <!-- Game Over Screen (אחרי המשחק) -->
   <div id="game-over-screen">
     <h1 class="game-over-title">נפסלת!</h1>
     <div class="game-over-stats">
       <div>הגעת לגל: <span id="final-wave">1</span></div>
-      <div>אויבים אדומים שחוסלו: <span id="final-kills">0</span></div>
+      <div>אויבים שחוסלו: <span id="final-kills">0</span></div>
+      <div>זהב שהרווחת בסיבוב: <span id="final-round-gold" style="color: #fbbf24;">+0 🪙</span></div>
+      <div style="margin-top: 8px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.1);">סך כל הזהב שברשותך: <span id="final-total-gold" style="color: #fbbf24; font-size: 20px;">🪙 0</span></div>
     </div>
-    <button id="btn-restart" class="btn-restart">שחק שוב ⚔️</button>
+    <div class="screen-actions">
+      <button id="btn-restart" class="btn-action-primary">שחק שוב ⚔️</button>
+      <button id="btn-gameover-shop" class="btn-action-shop">חנות שדרוגים 🛒</button>
+    </div>
+  </div>
+
+  <!-- Shop Modal (חנות) -->
+  <div id="shop-modal">
+    <div class="shop-container">
+      <div class="shop-header">
+        <div style="display: flex; align-items: center; gap: 10px;">
+          <h2>🛒 חנות הלוחם</h2>
+          <div class="shop-balance">🪙 <span id="shop-coin-count">0</span></div>
+        </div>
+        <button id="btn-close-shop" class="btn-close-shop" aria-label="סגור חנות">✕</button>
+      </div>
+
+      <!-- Shop Category Tabs -->
+      <div class="shop-tabs">
+        <button id="tab-btn-abilities" class="shop-tab active">✨ יכולות מיוחדות</button>
+        <button id="tab-btn-powerups" class="shop-tab">⚡ פאוור-אפים</button>
+      </div>
+
+      <!-- Shop Contents -->
+      <div class="shop-content">
+        <!-- Tab 1: Special Abilities (יכולות מיוחדות) -->
+        <div id="tab-pane-abilities" class="shop-tab-pane active">
+          <!-- 360 Degree Whirlwind Slash Ability -->
+          <div class="shop-item-card">
+            <div class="item-icon-box">🌪️⚔️</div>
+            <div class="item-details">
+              <div class="item-title">מכת חרב 360° (סופת חרבות)</div>
+              <div class="item-desc">המכה שלך פוגעת בכל האויבים האדומים ב-360 מעלות מסביבך בבת אחת!</div>
+            </div>
+            <button id="btn-buy-360" class="btn-buy">250 🪙</button>
+          </div>
+        </div>
+
+        <!-- Tab 2: Power-ups (פאוור-אפים) -->
+        <div id="tab-pane-powerups" class="shop-tab-pane">
+          <!-- Powerup 1: Max HP -->
+          <div class="shop-item-card">
+            <div class="item-icon-box">❤️</div>
+            <div class="item-details">
+              <div class="item-title">תוספת חיים (+25 HP מקסימלי)</div>
+              <div class="item-desc">מגדיל את כמות החיים המרבית של הלוחם לצמיתות.</div>
+            </div>
+            <button id="btn-buy-hp" class="btn-buy">50 🪙</button>
+          </div>
+
+          <!-- Powerup 2: Damage -->
+          <div class="shop-item-card">
+            <div class="item-icon-box">🗡️</div>
+            <div class="item-details">
+              <div class="item-title">נזק חרב משודרג (+5 נזק)</div>
+              <div class="item-desc">כל מכת חרב מורידה יותר נקודות חיים לאויבים.</div>
+            </div>
+            <button id="btn-buy-dmg" class="btn-buy">70 🪙</button>
+          </div>
+
+          <!-- Powerup 3: Speed -->
+          <div class="shop-item-card">
+            <div class="item-icon-box">👟</div>
+            <div class="item-details">
+              <div class="item-title">מהירות תנועה (+15%)</div>
+              <div class="item-desc">תנועה מהירה יותר בזירה להתחמקות נוחה מאויבים.</div>
+            </div>
+            <button id="btn-buy-speed" class="btn-buy">60 🪙</button>
+          </div>
+
+          <!-- Powerup 4: Full Heal -->
+          <div class="shop-item-card">
+            <div class="item-icon-box">🧪</div>
+            <div class="item-details">
+              <div class="item-title">שיקוי ריפוי מלא (100% חיים)</div>
+              <div class="item-desc">מרפא את כל החיים של הלוחם באופן מיידי במהלך המשחק.</div>
+            </div>
+            <button id="btn-buy-heal" class="btn-buy">25 🪙</button>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 
   <script>
@@ -616,6 +1030,53 @@
           osc.start(now + idx * 0.25);
           osc.stop(now + idx * 0.25 + 0.5);
         });
+      },
+      playCoin() {
+        if (!this.ctx) return;
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(987.77, now); // B5
+        osc.frequency.setValueAtTime(1318.51, now + 0.08); // E6
+        gain.gain.setValueAtTime(0.25, now);
+        gain.gain.exponentialRampToValueAtTime(0.001, now + 0.35);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.35);
+      },
+      playBuy() {
+        if (!this.ctx) return;
+        const now = this.ctx.currentTime;
+        const notes = [523.25, 659.25, 783.99, 1046.50]; // C5, E5, G5, C6
+        notes.forEach((freq, i) => {
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(freq, now + i * 0.07);
+          gain.gain.setValueAtTime(0.25, now + i * 0.07);
+          gain.gain.exponentialRampToValueAtTime(0.01, now + i * 0.07 + 0.3);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(now + i * 0.07);
+          osc.stop(now + i * 0.07 + 0.3);
+        });
+      },
+      playError() {
+        if (!this.ctx) return;
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(150, now);
+        osc.frequency.setValueAtTime(120, now + 0.1);
+        gain.gain.setValueAtTime(0.2, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.25);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.25);
       }
     };
 
@@ -627,6 +1088,7 @@
       ENEMY_MAX_HP: 30,
       PLAYER_DAMAGE: 10,
       ENEMY_DAMAGE: 10,
+      PLAYER_SPEED: 7.2,
       SLOWMO_DURATION_SEC: 1.0, // 1 real second in slow motion
       SLOWMO_TIMESCALE: 0.2,    // Game speeds at 20% during slowmo
       ARENA_RADIUS: 42,
@@ -636,14 +1098,29 @@
     };
 
     const Game = {
+      isStarted: false,
+      isShopOpen: false,
       playerHp: CONFIG.PLAYER_MAX_HP,
       wave: 1,
       totalKills: 0,
+      sessionKills: 0,
+      coins: 0,
+      sessionCoins: 0,
       isGameOver: false,
       isMoving: false,
       isAttacking: false,
       attackCooldownTimer: 0,
       
+      // Unlocked Abilities & Power-ups
+      abilities: {
+        whirlwind360: false
+      },
+      powerups: {
+        hpBonus: 0,
+        dmgBonus: 0,
+        speedBonus: 0
+      },
+
       // Slow Motion state
       slowMoActive: false,
       slowMoTimer: 0, // tracks real elapsed seconds
@@ -653,6 +1130,7 @@
       enemies: [],
       particles: [],
       floatingTexts: [],
+      whirlwindRings: [],
 
       // Controls
       inputMove: false,
@@ -962,33 +1440,56 @@
     playerModel.mesh.position.set(0, 0, 0);
 
     /* =========================================================
-       FLOATING DAMAGE NUMBERS & HIT PARTICLES
+       FLOATING DAMAGE NUMBERS, COIN GAINS & PARTICLES
        ========================================================= */
-    function spawnDamageText(position, damage, isPlayer = false) {
+    function spawnDamageText(position, text, isPlayer = false, customColor = null) {
       const canvas = document.createElement('canvas');
-      canvas.width = 128;
+      canvas.width = 160;
       canvas.height = 64;
       const ctx = canvas.getContext('2d');
-      ctx.fillStyle = isPlayer ? '#ef4444' : '#38bdf8';
+      ctx.fillStyle = customColor || (isPlayer ? '#ef4444' : '#38bdf8');
       ctx.font = 'bold 36px "Segoe UI", sans-serif';
       ctx.textAlign = 'center';
       ctx.textBaseline = 'middle';
       ctx.shadowColor = 'black';
       ctx.shadowBlur = 4;
-      ctx.fillText(`-${damage}`, 64, 32);
+      const str = typeof text === 'number' ? `-${text}` : text;
+      ctx.fillText(str, 80, 32);
 
       const texture = new THREE.CanvasTexture(canvas);
       const mat = new THREE.SpriteMaterial({ map: texture, transparent: true });
       const sprite = new THREE.Sprite(mat);
-      sprite.scale.set(1.2, 0.6, 1);
+      sprite.scale.set(1.4, 0.6, 1);
       sprite.position.copy(position);
       sprite.position.y += 2.2;
       scene.add(sprite);
 
       Game.floatingTexts.push({
         sprite,
-        velocity: new THREE.Vector3((Math.random() - 0.5) * 0.8, 2.2, (Math.random() - 0.5) * 0.8),
-        life: 0.75
+        velocity: new THREE.Vector3((Math.random() - 0.5) * 0.8, 2.4, (Math.random() - 0.5) * 0.8),
+        life: 0.85
+      });
+    }
+
+    function spawnWhirlwindVFX(position) {
+      const ringGeo = new THREE.RingGeometry(1.0, 3.7, 32);
+      const ringMat = new THREE.MeshBasicMaterial({
+        color: 0x38bdf8,
+        side: THREE.DoubleSide,
+        transparent: true,
+        opacity: 0.9,
+        blending: THREE.AdditiveBlending
+      });
+      const ringMesh = new THREE.Mesh(ringGeo, ringMat);
+      ringMesh.rotation.x = Math.PI / 2;
+      ringMesh.position.copy(position);
+      ringMesh.position.y = 1.1;
+      scene.add(ringMesh);
+
+      Game.whirlwindRings.push({
+        mesh: ringMesh,
+        scale: 0.6,
+        life: 0.4
       });
     }
 
@@ -1105,9 +1606,14 @@
         playerModel.swordTrail.rotation.z = playerModel.mesh.rotation.y - Math.PI * 0.4;
       }
 
+      const has360 = Game.abilities.whirlwind360;
+      if (has360) {
+        spawnWhirlwindVFX(playerPos);
+      }
+
       // Check Hits against enemies
-      const playerPos = playerModel.mesh.position;
       const playerForward = new THREE.Vector3(0, 0, 1).applyAxisAngle(new THREE.Vector3(0, 1, 0), playerModel.mesh.rotation.y);
+      const attackRange = has360 ? CONFIG.SWORD_RANGE * 1.15 : CONFIG.SWORD_RANGE;
 
       let hitAny = false;
       Game.enemies.forEach(enemy => {
@@ -1115,12 +1621,13 @@
         const enemyPos = enemy.model.mesh.position;
         const dist = playerPos.distanceTo(enemyPos);
 
-        if (dist <= CONFIG.SWORD_RANGE) {
+        if (dist <= attackRange) {
           // Angle check to see if enemy is in front swing arc
           const toEnemy = new THREE.Vector3().subVectors(enemyPos, playerPos).normalize();
           const angle = playerForward.angleTo(toEnemy);
 
-          if (angle < CONFIG.SWORD_ARC / 2 || dist < 1.4) {
+          // 360 DEGREE ABILITY: Hits ALL enemies in 360 degrees around the warrior!
+          if (has360 || angle < CONFIG.SWORD_ARC / 2 || dist < 1.4) {
             // HIT CONFIRMED!
             hitAny = true;
             enemy.hp -= CONFIG.PLAYER_DAMAGE;
@@ -1139,9 +1646,13 @@
             if (enemy.hp <= 0) {
               enemy.isDead = true;
               Game.totalKills++;
+              Game.sessionKills++;
               SoundEngine.playEnemyDefeat();
               spawnHitParticles(enemyPos, 0xff2222, 35);
               scene.remove(enemy.model.mesh);
+
+              // 10 GOLD COINS FOR EVERY ENEMY DEFEATED!
+              awardCoins(10, enemyPos);
             }
           }
         }
@@ -1216,10 +1727,14 @@
 
       document.getElementById('final-wave').textContent = Game.wave;
       document.getElementById('final-kills').textContent = Game.totalKills;
+      document.getElementById('final-round-gold').textContent = `+${Game.sessionCoins} 🪙`;
+      document.getElementById('final-total-gold').textContent = `🪙 ${Game.coins}`;
       document.getElementById('game-over-screen').classList.add('active');
     }
 
     function restartGame() {
+      // Clear session coins
+      Game.sessionCoins = 0;
       // Clear enemies
       Game.enemies.forEach(e => scene.remove(e.model.mesh));
       Game.enemies = [];
@@ -1482,11 +1997,15 @@
         Game.attackCooldownTimer -= realDelta; // cooldown uses real-time so player isn't stuck
       }
 
-      if (!Game.isGameOver) {
+      if (Game.isStarted && !Game.isGameOver && !Game.isShopOpen) {
         updatePlayer(gameDelta, realDelta);
         updateEnemies(gameDelta);
+      } else if (!Game.isStarted) {
+        // Showcase camera slow orbit before start
+        cameraYaw += realDelta * 0.18;
       }
 
+      updateWhirlwindRings(gameDelta);
       updateParticles(gameDelta);
       updateDamageTexts(gameDelta);
       updateThirdPersonCamera(realDelta);
@@ -1536,7 +2055,7 @@
       const isWalking = moveVector.lengthSq() > 0.01;
       if (isWalking) {
         moveVector.normalize();
-        const playerSpeed = 7.2;
+        const playerSpeed = (CONFIG.PLAYER_SPEED || 7.2) * (1 + (Game.powerups.speedBonus || 0));
         player.position.addScaledVector(moveVector, playerSpeed * dt);
 
         // Constrain to arena radius
@@ -1562,8 +2081,14 @@
       if (Game.isAttacking) {
         // Dramatic slash swing motion
         const swingProgress = Math.min(1.0, (CONFIG.ATTACK_COOLDOWN - Game.attackCooldownTimer) / 0.35);
-        playerModel.rightArmPivot.rotation.x = -Math.sin(swingProgress * Math.PI) * 1.8;
-        playerModel.rightArmPivot.rotation.y = Math.cos(swingProgress * Math.PI) * 1.5;
+        if (Game.abilities.whirlwind360) {
+          playerModel.rightArmPivot.rotation.x = -0.3;
+          playerModel.rightArmPivot.rotation.y = swingProgress * Math.PI * 2;
+          player.rotation.y += realDt * 16; // 360 spin rotation
+        } else {
+          playerModel.rightArmPivot.rotation.x = -Math.sin(swingProgress * Math.PI) * 1.8;
+          playerModel.rightArmPivot.rotation.y = Math.cos(swingProgress * Math.PI) * 1.5;
+        }
 
         // Fade sword trail
         if (playerModel.swordTrail) {
@@ -1728,8 +2253,298 @@
       camera.lookAt(camTarget);
     }
 
-    // Start Wave 1 on load
-    startWave(1);
+    /* =========================================================
+       WHIRLWIND VFX UPDATE
+       ========================================================= */
+    function updateWhirlwindRings(dt) {
+      for (let i = Game.whirlwindRings.length - 1; i >= 0; i--) {
+        const ring = Game.whirlwindRings[i];
+        ring.life -= dt;
+        ring.scale += dt * 8.0;
+        ring.mesh.scale.set(ring.scale, ring.scale, ring.scale);
+        ring.mesh.rotation.z += dt * 15;
+        ring.mesh.material.opacity = Math.max(0, ring.life / 0.4);
+        if (ring.life <= 0) {
+          scene.remove(ring.mesh);
+          Game.whirlwindRings.splice(i, 1);
+        }
+      }
+    }
+
+    /* =========================================================
+       COINS & REWARDS SYSTEM
+       ========================================================= */
+    function awardCoins(amount, position) {
+      Game.coins += amount;
+      Game.sessionCoins += amount;
+      try {
+        localStorage.setItem('sword_arena_coins', Game.coins);
+      } catch (e) {}
+      updateCoinsUI();
+      SoundEngine.playCoin();
+      if (position) {
+        spawnDamageText(position, `+${amount} 🪙`, false, '#fbbf24');
+      }
+    }
+
+    function updateCoinsUI() {
+      const hudCoin = document.getElementById('hud-coin-count');
+      if (hudCoin) hudCoin.textContent = Game.coins;
+      const startGold = document.getElementById('start-gold-count');
+      if (startGold) startGold.textContent = `🪙 ${Game.coins}`;
+      const shopCoin = document.getElementById('shop-coin-count');
+      if (shopCoin) shopCoin.textContent = Game.coins;
+      const finalRound = document.getElementById('final-round-gold');
+      if (finalRound) finalRound.textContent = `+${Game.sessionCoins} 🪙`;
+      const finalTotal = document.getElementById('final-total-gold');
+      if (finalTotal) finalTotal.textContent = `🪙 ${Game.coins}`;
+
+      // 360 ability indicator tag on HUD
+      const abilityTag = document.getElementById('hud-ability-tag');
+      if (abilityTag) {
+        abilityTag.style.display = Game.abilities.whirlwind360 ? 'block' : 'none';
+      }
+
+      // Damage label on HUD
+      const dmgLabel = document.getElementById('player-dmg-label');
+      if (dmgLabel) {
+        dmgLabel.textContent = `חרב: ${CONFIG.PLAYER_DAMAGE} נזק`;
+      }
+
+      // Update shop buttons availability
+      updateShopButtons();
+    }
+
+    function updateShopButtons() {
+      // 360 Ability Button
+      const btn360 = document.getElementById('btn-buy-360');
+      if (btn360) {
+        if (Game.abilities.whirlwind360) {
+          btn360.textContent = 'נרכש ✔️';
+          btn360.className = 'btn-buy owned';
+        } else if (Game.coins < 250) {
+          btn360.textContent = '250 🪙';
+          btn360.className = 'btn-buy cant-afford';
+        } else {
+          btn360.textContent = '250 🪙';
+          btn360.className = 'btn-buy';
+        }
+      }
+
+      // HP Powerup Button (50 coins)
+      const btnHp = document.getElementById('btn-buy-hp');
+      if (btnHp) {
+        if (Game.coins < 50) {
+          btnHp.className = 'btn-buy cant-afford';
+        } else {
+          btnHp.className = 'btn-buy';
+        }
+      }
+
+      // DMG Powerup Button (70 coins)
+      const btnDmg = document.getElementById('btn-buy-dmg');
+      if (btnDmg) {
+        if (Game.coins < 70) {
+          btnDmg.className = 'btn-buy cant-afford';
+        } else {
+          btnDmg.className = 'btn-buy';
+        }
+      }
+
+      // Speed Powerup Button (60 coins)
+      const btnSpeed = document.getElementById('btn-buy-speed');
+      if (btnSpeed) {
+        if (Game.coins < 60) {
+          btnSpeed.className = 'btn-buy cant-afford';
+        } else {
+          btnSpeed.className = 'btn-buy';
+        }
+      }
+
+      // Heal Powerup Button (25 coins)
+      const btnHeal = document.getElementById('btn-buy-heal');
+      if (btnHeal) {
+        if (Game.coins < 25 || Game.playerHp >= CONFIG.PLAYER_MAX_HP) {
+          btnHeal.className = 'btn-buy cant-afford';
+        } else {
+          btnHeal.className = 'btn-buy';
+        }
+      }
+    }
+
+    function loadSavedData() {
+      try {
+        const savedCoins = localStorage.getItem('sword_arena_coins');
+        if (savedCoins !== null) {
+          Game.coins = parseInt(savedCoins, 10) || 0;
+        }
+
+        const ability360 = localStorage.getItem('sword_arena_ability_360');
+        if (ability360 === 'true') {
+          Game.abilities.whirlwind360 = true;
+        }
+
+        const savedHp = localStorage.getItem('sword_arena_bonus_hp');
+        if (savedHp !== null) {
+          Game.powerups.hpBonus = parseInt(savedHp, 10) || 0;
+          CONFIG.PLAYER_MAX_HP = 100 + Game.powerups.hpBonus;
+          Game.playerHp = CONFIG.PLAYER_MAX_HP;
+        }
+
+        const savedDmg = localStorage.getItem('sword_arena_bonus_dmg');
+        if (savedDmg !== null) {
+          Game.powerups.dmgBonus = parseInt(savedDmg, 10) || 0;
+          CONFIG.PLAYER_DAMAGE = 10 + Game.powerups.dmgBonus;
+        }
+
+        const savedSpeed = localStorage.getItem('sword_arena_bonus_speed');
+        if (savedSpeed !== null) {
+          Game.powerups.speedBonus = parseFloat(savedSpeed) || 0;
+        }
+      } catch (e) {
+        console.warn('Storage unavailable', e);
+      }
+      updateCoinsUI();
+    }
+
+    /* =========================================================
+       SHOP LOGIC & CATEGORIES
+       ========================================================= */
+    function openShop() {
+      SoundEngine.init();
+      Game.isShopOpen = true;
+      updateCoinsUI();
+      document.getElementById('shop-modal').classList.add('active');
+    }
+
+    function closeShop() {
+      Game.isShopOpen = false;
+      document.getElementById('shop-modal').classList.remove('active');
+    }
+
+    function switchShopTab(tab) {
+      SoundEngine.init();
+      const tabAbilities = document.getElementById('tab-btn-abilities');
+      const tabPowerups = document.getElementById('tab-btn-powerups');
+      const paneAbilities = document.getElementById('tab-pane-abilities');
+      const panePowerups = document.getElementById('tab-pane-powerups');
+
+      if (tab === 'abilities') {
+        tabAbilities.classList.add('active');
+        tabPowerups.classList.remove('active');
+        paneAbilities.classList.add('active');
+        panePowerups.classList.remove('active');
+      } else {
+        tabPowerups.classList.add('active');
+        tabAbilities.classList.remove('active');
+        panePowerups.classList.add('active');
+        panePowerups.classList.remove('active');
+      }
+    }
+
+    function buyAbility360() {
+      SoundEngine.init();
+      if (Game.abilities.whirlwind360) return;
+      if (Game.coins < 250) {
+        SoundEngine.playError();
+        showBanner('אין מספיק מטבעות!', 'דרוש 250 מטבעות זהב');
+        return;
+      }
+
+      Game.coins -= 250;
+      Game.abilities.whirlwind360 = true;
+      try {
+        localStorage.setItem('sword_arena_coins', Game.coins);
+        localStorage.setItem('sword_arena_ability_360', 'true');
+      } catch (e) {}
+
+      SoundEngine.playBuy();
+      updateCoinsUI();
+      showBanner('יכולת 360° נרכשה! 🌪️', 'מכת החרב פוגעת כעת בכל הכיוונים מסביבך!');
+    }
+
+    function buyPowerup(type, cost) {
+      SoundEngine.init();
+      if (Game.coins < cost) {
+        SoundEngine.playError();
+        showBanner('אין מספיק מטבעות!', `דרוש ${cost} מטבעות זהב`);
+        return;
+      }
+
+      if (type === 'heal' && Game.playerHp >= CONFIG.PLAYER_MAX_HP) {
+        SoundEngine.playError();
+        showBanner('החיים שלך מלאים!', 'לא ניתן לרפא כרגע');
+        return;
+      }
+
+      Game.coins -= cost;
+
+      if (type === 'hp') {
+        Game.powerups.hpBonus = (Game.powerups.hpBonus || 0) + 25;
+        CONFIG.PLAYER_MAX_HP = 100 + Game.powerups.hpBonus;
+        Game.playerHp += 25;
+        try {
+          localStorage.setItem('sword_arena_bonus_hp', Game.powerups.hpBonus);
+        } catch (e) {}
+        showBanner('+25 חיים מקסימליים! ❤️', `חיים מירביים חדשים: ${CONFIG.PLAYER_MAX_HP}`);
+      } else if (type === 'dmg') {
+        Game.powerups.dmgBonus = (Game.powerups.dmgBonus || 0) + 5;
+        CONFIG.PLAYER_DAMAGE = 10 + Game.powerups.dmgBonus;
+        try {
+          localStorage.setItem('sword_arena_bonus_dmg', Game.powerups.dmgBonus);
+        } catch (e) {}
+        showBanner('+5 נזק חרב! 🗡️', `נזק חרב חדש: ${CONFIG.PLAYER_DAMAGE}`);
+      } else if (type === 'speed') {
+        Game.powerups.speedBonus = (Game.powerups.speedBonus || 0) + 0.15;
+        try {
+          localStorage.setItem('sword_arena_bonus_speed', Game.powerups.speedBonus);
+        } catch (e) {}
+        showBanner('+15% מהירות ריצה! 👟', 'הלוחם זז מהר יותר בזירה!');
+      } else if (type === 'heal') {
+        Game.playerHp = CONFIG.PLAYER_MAX_HP;
+        showBanner('ריפוי מלא! 🧪', 'מד החיים התמלא ב-100%!');
+      }
+
+      // Update HP bar UI
+      const pct = (Game.playerHp / CONFIG.PLAYER_MAX_HP) * 100;
+      const hpFill = document.getElementById('player-hp-fill');
+      const hpText = document.getElementById('player-hp-text');
+      if (hpFill) hpFill.style.width = `${pct}%`;
+      if (hpText) hpText.textContent = `${Game.playerHp} / ${CONFIG.PLAYER_MAX_HP} HP`;
+
+      try {
+        localStorage.setItem('sword_arena_coins', Game.coins);
+      } catch (e) {}
+
+      SoundEngine.playBuy();
+      updateCoinsUI();
+    }
+
+    function startGame() {
+      SoundEngine.init();
+      document.getElementById('start-screen').classList.remove('active');
+      Game.isStarted = true;
+      startWave(1);
+    }
+
+    // Attach Event Listeners
+    document.getElementById('btn-start-game').addEventListener('click', startGame);
+    document.getElementById('btn-start-shop').addEventListener('click', openShop);
+    document.getElementById('btn-hud-shop').addEventListener('click', openShop);
+    document.getElementById('btn-gameover-shop').addEventListener('click', openShop);
+    document.getElementById('btn-close-shop').addEventListener('click', closeShop);
+
+    document.getElementById('tab-btn-abilities').addEventListener('click', () => switchShopTab('abilities'));
+    document.getElementById('tab-btn-powerups').addEventListener('click', () => switchShopTab('powerups'));
+
+    document.getElementById('btn-buy-360').addEventListener('click', buyAbility360);
+    document.getElementById('btn-buy-hp').addEventListener('click', () => buyPowerup('hp', 50));
+    document.getElementById('btn-buy-dmg').addEventListener('click', () => buyPowerup('dmg', 70));
+    document.getElementById('btn-buy-speed').addEventListener('click', () => buyPowerup('speed', 60));
+    document.getElementById('btn-buy-heal').addEventListener('click', () => buyPowerup('heal', 25));
+
+    // Load saved coins and upgrades, then start render loop
+    loadSavedData();
     animate();
   </script>
 </body>
