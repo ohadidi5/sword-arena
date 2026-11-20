@@ -1,12 +1,11 @@
 {
-  "version": "1.7",
-  "build": 1732123000,
-  "updatedAt": "2026-11-20T17:15:00Z",
+  "version": "1.8",
+  "build": 1732123500,
+  "updatedAt": "2026-11-20T17:25:00Z",
   "features": [
-    "Automatic update engine",
-    "Screen attack fix",
-    "Dedicated attack button",
-    "360 whirlwind ability",
-    "Coins and shop system"
+    "Landscape game-over screen fit",
+    "HUD ultra-compact mode (higher up and 60% smaller)",
+    "Lower joystick position",
+    "Removed joystick text captions"
   ]
 }
