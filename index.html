@@ -6,7 +6,7 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <title>זירת החרב - קרב גלים (v1.2)</title>
+  <title>זירת החרב - קרב גלים (v1.3)</title>
   <style>
     * {
       box-sizing: border-box;
@@ -413,7 +413,7 @@
         <div class="wave-title">גל קרב</div>
         <div id="wave-display" class="wave-number">1</div>
         <div id="enemies-remaining" class="wave-remaining">אויבים: 3</div>
-        <div style="font-size: 10px; color: #10b981; margin-top: 4px; font-weight: bold;">גרסה 1.2 ✔️</div>
+        <div style="font-size: 10px; color: #10b981; margin-top: 4px; font-weight: bold;">גרסה 1.3 ✔️</div>
       </div>
     </div>
 
@@ -1513,7 +1513,7 @@
         const forwardAmount = -joystickNormalized.y;
         const strafeAmount = joystickNormalized.x;
         moveVector.addScaledVector(camForward, forwardAmount);
-        moveVector.addScaledVector(camRight, -strafeAmount);
+        moveVector.addScaledVector(camRight, strafeAmount);
       }
 
       // Keyboard WASD / Arrows
@@ -1524,10 +1524,10 @@
         moveVector.addScaledVector(camForward, -1);
       }
       if (Game.keys.a || Game.keys.ArrowLeft) {
-        moveVector.addScaledVector(camRight, 1);
+        moveVector.addScaledVector(camRight, -1);
       }
       if (Game.keys.d || Game.keys.ArrowRight) {
-        moveVector.addScaledVector(camRight, -1);
+        moveVector.addScaledVector(camRight, 1);
       }
 
       // 3. Player Character Facing Angle: faces movement direction smoothly, or aligns with camera
