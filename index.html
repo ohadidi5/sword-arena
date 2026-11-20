@@ -1273,14 +1273,18 @@
     const CENTER_DEADZONE = 14;     // Deadzone in pixels to define center
     const MAX_JOYSTICK_RADIUS = 35; // Maximum travel distance for knob
 
-    // Screen Drag State for Camera Angle Control ("שינוי זווית המסך על ידי הזזה של המסך")
+    // Pointer ID isolation to prevent multi-touch screen jumping
+    let joystickPointerId = null;
+    let cameraPointerId = null;
     let isDraggingScreen = false;
     let screenDragMoved = false;
-    let lastScreenPointer = { x: 0, y: 0 };
+    let lastScreenX = 0;
+    let lastScreenY = 0;
 
     function onJoystickPointerDown(e) {
       e.stopPropagation();
       SoundEngine.init();
+      joystickPointerId = e.pointerId;
       joystickActive = true;
       joystickMoved = false;
       const rect = joystickBase.getBoundingClientRect();
@@ -1330,6 +1334,7 @@
 
       joystickActive = false;
       joystickMoved = false;
+      joystickPointerId = null;
       Game.inputMove = false;
       joystickNormalized.x = 0;
       joystickNormalized.y = 0;
@@ -1340,56 +1345,72 @@
       joystickBase.addEventListener('pointerdown', onJoystickPointerDown);
     }
 
-    // Screen touch/drag: Controls camera view angle! ("הזזה של המסך")
+    // Screen touch/drag: Controls camera view angle strictly without jumping!
     window.addEventListener('pointerdown', (e) => {
-      // If clicking inside the game arena (not the joystick or game over button)
-      if (e.target.tagName !== 'BUTTON' && !e.target.closest('#joystick-base') && !e.target.closest('#game-over-screen')) {
-        SoundEngine.init();
+      // Ignore if clicking joystick or buttons
+      if (e.target.closest('#joystick-base') || e.target.closest('button') || e.target.closest('#game-over-screen')) {
+        return;
+      }
+
+      SoundEngine.init();
+
+      if (!isDraggingScreen) {
+        cameraPointerId = e.pointerId;
         isDraggingScreen = true;
         screenDragMoved = false;
-        lastScreenPointer.x = e.clientX;
-        lastScreenPointer.y = e.clientY;
+        lastScreenX = e.clientX;
+        lastScreenY = e.clientY;
       }
     });
 
     window.addEventListener('pointermove', (e) => {
-      if (joystickActive) {
+      // 1. Joystick only tracks its own pointer ID
+      if (joystickActive && e.pointerId === joystickPointerId) {
         updateJoystickPosition(e.clientX, e.clientY);
       }
 
-      // Dragging the screen changes the camera view angle!
-      if (isDraggingScreen) {
-        const deltaX = e.clientX - lastScreenPointer.x;
-        const deltaY = e.clientY - lastScreenPointer.y;
-        if (Math.hypot(deltaX, deltaY) > 3) {
-          screenDragMoved = true;
+      // 2. Camera drag only tracks its own pointer ID (prevents jumping when moving and attacking!)
+      if (isDraggingScreen && e.pointerId === cameraPointerId) {
+        const deltaX = e.clientX - lastScreenX;
+        const deltaY = e.clientY - lastScreenY;
+
+        // Ignore erratic single-frame jumps (> 80px) to prevent teleportation
+        if (Math.abs(deltaX) < 80 && Math.abs(deltaY) < 80) {
+          if (Math.hypot(deltaX, deltaY) > 2) {
+            screenDragMoved = true;
+          }
+          cameraYaw -= deltaX * 0.0055;
+          cameraPitch = Math.max(-0.35, Math.min(0.45, cameraPitch - deltaY * 0.0035));
         }
 
-        // Horizontal screen drag rotates cameraYaw
-        cameraYaw -= deltaX * 0.007;
-        // Vertical screen drag tilts camera height
-        cameraPitch = Math.max(-0.35, Math.min(0.5, cameraPitch - deltaY * 0.004));
-
-        lastScreenPointer.x = e.clientX;
-        lastScreenPointer.y = e.clientY;
+        lastScreenX = e.clientX;
+        lastScreenY = e.clientY;
       }
     });
 
     window.addEventListener('pointerup', (e) => {
-      onJoystickPointerUp(e);
+      if (joystickActive && e.pointerId === joystickPointerId) {
+        onJoystickPointerUp(e);
+      }
 
-      if (isDraggingScreen) {
+      if (isDraggingScreen && e.pointerId === cameraPointerId) {
         // Quick tap without dragging: triggers sword strike
-        if (!screenDragMoved && e.button === 0) {
+        if (!screenDragMoved && (e.button === 0 || e.pointerType === 'touch')) {
           triggerSwordAttack();
         }
         isDraggingScreen = false;
+        cameraPointerId = null;
       }
     });
 
     window.addEventListener('pointercancel', (e) => {
-      onJoystickPointerUp(e);
-      isDraggingScreen = false;
+      if (joystickActive && e.pointerId === joystickPointerId) {
+        onJoystickPointerUp(e);
+      }
+      if (isDraggingScreen && e.pointerId === cameraPointerId) {
+        isDraggingScreen = false;
+        cameraPointerId = null;
+      }
     });
 
     // Restart button
@@ -1639,21 +1660,24 @@
        DYNAMIC 3RD PERSON CAMERA
        Smooth follow behind and above the faceless warrior
        ========================================================= */
-    const camTarget = new THREE.Vector3();
-    const camPos = new THREE.Vector3();
+    const camTarget = new THREE.Vector3(0, 1.4, 0);
+    const camPos = new THREE.Vector3(0, 9.5, -13.5);
+    const desiredCamPos = new THREE.Vector3();
+    const desiredCamTarget = new THREE.Vector3();
 
     function updateThirdPersonCamera(dt) {
       const playerPos = playerModel.mesh.position;
 
       // Position camera elevated and behind the player's view along cameraYaw and cameraPitch
-      const camHeight = 9.5 + cameraPitch * 6;
+      const camHeight = 9.5 + cameraPitch * 5;
       const camOffset = new THREE.Vector3(0, camHeight, -13.5);
       camOffset.applyAxisAngle(new THREE.Vector3(0, 1, 0), cameraYaw);
 
-      camPos.copy(playerPos).add(camOffset);
-      camTarget.copy(playerPos).add(new THREE.Vector3(0, 1.4, 0));
+      desiredCamPos.copy(playerPos).add(camOffset);
+      desiredCamTarget.copy(playerPos).add(new THREE.Vector3(0, 1.4, 0));
 
-      camera.position.lerp(camPos, 0.15);
+      camera.position.lerp(desiredCamPos, 0.14);
+      camTarget.lerp(desiredCamTarget, 0.16);
       camera.lookAt(camTarget);
     }
 
