@@ -431,7 +431,8 @@
         <span class="dir-arrow dir-right">▶</span>
         <div id="joystick-knob" class="joystick-knob">⚔️</div>
       </div>
-      <div class="joystick-label">מרכז: חרב ⚔️ | החלקה: תזוזה וזווית מסך 🎥</div>
+      <div class="joystick-label">מרכז: חרב ⚔️ | החלקה: תזוזה 🏃</div>
+      <div class="pc-hints">הזזת המסך = שינוי זווית מצלמה 🎥</div>
     </div>
   </div>
 
@@ -1267,12 +1268,18 @@
     let joystickMoved = false;
     let joystickOrigin = { x: 0, y: 0 };
     let joystickNormalized = { x: 0, y: 0 };
-    let cameraYaw = 0; // Horizontal orbit angle for the camera and screen
+    let cameraYaw = 0;   // Horizontal orbit angle
+    let cameraPitch = 0; // Vertical tilt angle
     const CENTER_DEADZONE = 14;     // Deadzone in pixels to define center
     const MAX_JOYSTICK_RADIUS = 35; // Maximum travel distance for knob
 
+    // Screen Drag State for Camera Angle Control ("שינוי זווית המסך על ידי הזזה של המסך")
+    let isDraggingScreen = false;
+    let screenDragMoved = false;
+    let lastScreenPointer = { x: 0, y: 0 };
+
     function onJoystickPointerDown(e) {
-      e.preventDefault();
+      e.stopPropagation();
       SoundEngine.init();
       joystickActive = true;
       joystickMoved = false;
@@ -1290,8 +1297,7 @@
       const dist = Math.hypot(dx, dy);
 
       if (dist > CENTER_DEADZONE) {
-        // User slid away from center:
-        // "אם אתה עושה למעלה למטה או לצד אז זה לא מרביץ עם החרב" -> תזוזה ושליטה על זווית המסך!
+        // User slid away from center: PURE MOVEMENT ONLY (NO sword attack, NO camera change)
         joystickMoved = true;
         const clampedDist = Math.min(dist, MAX_JOYSTICK_RADIUS);
         const angle = Math.atan2(dy, dx);
@@ -1305,7 +1311,6 @@
         joystickNormalized.y = Math.sin(angle) * norm; // >0 is down, <0 is up
         Game.inputMove = true;
       } else {
-        // Center position
         joystickKnob.style.transform = `translate(-50%, -50%)`;
         joystickNormalized.x = 0;
         joystickNormalized.y = 0;
@@ -1316,7 +1321,7 @@
     function onJoystickPointerUp(e) {
       if (!joystickActive) return;
 
-      // "רק אם אתה לוחץ במרכז הכפתור בלי שום החלקה ימינה שמאלה למטה רק אז זה מרביץ עם החרב"
+      // Tap in center without sliding: triggers sword attack!
       if (!joystickMoved) {
         triggerSwordAttack();
         joystickKnob.classList.add('attack-pulse');
@@ -1333,27 +1338,59 @@
 
     if (joystickBase) {
       joystickBase.addEventListener('pointerdown', onJoystickPointerDown);
-      window.addEventListener('pointermove', (e) => {
-        if (joystickActive) {
-          e.preventDefault();
-          updateJoystickPosition(e.clientX, e.clientY);
-        } else {
-          // Normal mouse aim when not using joystick
-          const mouse = new THREE.Vector2(
-            (e.clientX / window.innerWidth) * 2 - 1,
-            -(e.clientY / window.innerHeight) * 2 + 1
-          );
-          Game.raycaster.setFromCamera(mouse, camera);
-          const intersectPoint = new THREE.Vector3();
-          Game.raycaster.ray.intersectPlane(Game.plane, intersectPoint);
-          if (intersectPoint) {
-            Game.mouseWorldPos.copy(intersectPoint);
-          }
-        }
-      });
-      window.addEventListener('pointerup', onJoystickPointerUp);
-      window.addEventListener('pointercancel', onJoystickPointerUp);
     }
+
+    // Screen touch/drag: Controls camera view angle! ("הזזה של המסך")
+    window.addEventListener('pointerdown', (e) => {
+      // If clicking inside the game arena (not the joystick or game over button)
+      if (e.target.tagName !== 'BUTTON' && !e.target.closest('#joystick-base') && !e.target.closest('#game-over-screen')) {
+        SoundEngine.init();
+        isDraggingScreen = true;
+        screenDragMoved = false;
+        lastScreenPointer.x = e.clientX;
+        lastScreenPointer.y = e.clientY;
+      }
+    });
+
+    window.addEventListener('pointermove', (e) => {
+      if (joystickActive) {
+        updateJoystickPosition(e.clientX, e.clientY);
+      }
+
+      // Dragging the screen changes the camera view angle!
+      if (isDraggingScreen) {
+        const deltaX = e.clientX - lastScreenPointer.x;
+        const deltaY = e.clientY - lastScreenPointer.y;
+        if (Math.hypot(deltaX, deltaY) > 3) {
+          screenDragMoved = true;
+        }
+
+        // Horizontal screen drag rotates cameraYaw
+        cameraYaw -= deltaX * 0.007;
+        // Vertical screen drag tilts camera height
+        cameraPitch = Math.max(-0.35, Math.min(0.5, cameraPitch - deltaY * 0.004));
+
+        lastScreenPointer.x = e.clientX;
+        lastScreenPointer.y = e.clientY;
+      }
+    });
+
+    window.addEventListener('pointerup', (e) => {
+      onJoystickPointerUp(e);
+
+      if (isDraggingScreen) {
+        // Quick tap without dragging: triggers sword strike
+        if (!screenDragMoved && e.button === 0) {
+          triggerSwordAttack();
+        }
+        isDraggingScreen = false;
+      }
+    });
+
+    window.addEventListener('pointercancel', (e) => {
+      onJoystickPointerUp(e);
+      isDraggingScreen = false;
+    });
 
     // Restart button
     btnRestart.addEventListener('click', restartGame);
@@ -1376,16 +1413,6 @@
       if (e.code === 'KeyS' || e.key === 'ArrowDown') Game.keys.s = false;
       if (e.code === 'KeyA' || e.key === 'ArrowLeft') Game.keys.a = false;
       if (e.code === 'KeyD' || e.key === 'ArrowRight') Game.keys.d = false;
-    });
-
-    window.addEventListener('pointerdown', (e) => {
-      // Clicking the game arena (outside UI) can trigger sword attack if desired
-      if (e.target.tagName !== 'BUTTON' && !e.target.closest('#joystick-base') && !e.target.closest('#game-over-screen')) {
-        SoundEngine.init();
-        if (e.button === 0) {
-          triggerSwordAttack();
-        }
-      }
     });
 
     window.addEventListener('resize', () => {
@@ -1449,24 +1476,11 @@
     function updatePlayer(dt, realDt) {
       const player = playerModel.mesh;
 
-      // 1. Camera Angle Control via Joystick Horizontal Drag (or Keyboard A/D)
-      if (joystickActive && Math.abs(joystickNormalized.x) > 0.04) {
-        // Sliding right turns camera right, sliding left turns camera left
-        const cameraTurnSpeed = 2.8;
-        cameraYaw -= joystickNormalized.x * cameraTurnSpeed * dt;
-      }
-      if (Game.keys.a || Game.keys.ArrowLeft) {
-        cameraYaw += 2.2 * dt;
-      }
-      if (Game.keys.d || Game.keys.ArrowRight) {
-        cameraYaw -= 2.2 * dt;
-      }
-
       // Camera forward & right vectors based on cameraYaw
       const camForward = new THREE.Vector3(0, 0, 1).applyAxisAngle(new THREE.Vector3(0, 1, 0), cameraYaw);
       const camRight = new THREE.Vector3(-1, 0, 0).applyAxisAngle(new THREE.Vector3(0, 1, 0), cameraYaw);
 
-      // 2. Movement (Joystick or Keys) - NOTE: Moving NEVER triggers sword attack!
+      // Movement (Joystick or Keys) - NOTE: Moving NEVER triggers sword attack, and joystick does NOT rotate camera!
       let moveVector = new THREE.Vector3(0, 0, 0);
 
       // Joystick: dy < 0 is UP (forward), dy > 0 is DOWN (backward); dx is strafe
@@ -1474,25 +1488,27 @@
         const forwardAmount = -joystickNormalized.y;
         const strafeAmount = joystickNormalized.x;
         moveVector.addScaledVector(camForward, forwardAmount);
-        moveVector.addScaledVector(camRight, -strafeAmount * 0.7);
+        moveVector.addScaledVector(camRight, -strafeAmount);
       }
 
-      // Keyboard WASD
+      // Keyboard WASD / Arrows
       if (Game.keys.w || Game.keys.ArrowUp) {
         moveVector.add(camForward);
       }
       if (Game.keys.s || Game.keys.ArrowDown) {
         moveVector.addScaledVector(camForward, -1);
       }
+      if (Game.keys.a || Game.keys.ArrowLeft) {
+        moveVector.addScaledVector(camRight, 1);
+      }
+      if (Game.keys.d || Game.keys.ArrowRight) {
+        moveVector.addScaledVector(camRight, -1);
+      }
 
-      // 3. Player Character Facing Angle
+      // 3. Player Character Facing Angle: faces movement direction smoothly, or aligns with camera
       let targetAngle = cameraYaw;
       if (moveVector.lengthSq() > 0.01) {
         targetAngle = Math.atan2(moveVector.x, moveVector.z);
-      } else if (Game.mouseWorldPos && Game.mouseWorldPos.lengthSq() > 0.1 && !joystickActive) {
-        const dx = Game.mouseWorldPos.x - player.position.x;
-        const dz = Game.mouseWorldPos.z - player.position.z;
-        targetAngle = Math.atan2(dx, dz);
       }
       player.rotation.y = THREE.MathUtils.lerp(player.rotation.y, targetAngle, 0.22);
 
@@ -1629,14 +1645,15 @@
     function updateThirdPersonCamera(dt) {
       const playerPos = playerModel.mesh.position;
 
-      // Position camera elevated and behind the player's view along cameraYaw
-      const camOffset = new THREE.Vector3(0, 9.5, -13.5);
+      // Position camera elevated and behind the player's view along cameraYaw and cameraPitch
+      const camHeight = 9.5 + cameraPitch * 6;
+      const camOffset = new THREE.Vector3(0, camHeight, -13.5);
       camOffset.applyAxisAngle(new THREE.Vector3(0, 1, 0), cameraYaw);
 
       camPos.copy(playerPos).add(camOffset);
       camTarget.copy(playerPos).add(new THREE.Vector3(0, 1.4, 0));
 
-      camera.position.lerp(camPos, 0.12);
+      camera.position.lerp(camPos, 0.15);
       camera.lookAt(camTarget);
     }
 
