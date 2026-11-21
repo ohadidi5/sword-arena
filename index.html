@@ -6,10 +6,10 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <title>זירת החרב - אויבים מיוחדים וקרבות גלים (v2.8)</title>
+  <title>זירת החרב - אויבים מיוחדים וקרבות גלים (v2.9)</title>
   <script>
     // AUTOMATIC AUTO-UPDATE & INSTANT CACHE-BUSTER ENGINE
-    const APP_VERSION = "2.8";
+    const APP_VERSION = "2.9";
     (function checkAutoUpdate() {
       try {
         const params = new URLSearchParams(window.location.search);
@@ -1017,7 +1017,7 @@
       <div class="hud-card wave-badge">
         <div class="wave-title">גל <span id="wave-display" class="wave-number">1</span></div>
         <div id="enemies-remaining" class="wave-remaining">אויבים: 3</div>
-        <div style="font-size: 9px; color: #10b981; font-weight: bold;">גרסה 2.8 ✔️</div>
+        <div style="font-size: 9px; color: #10b981; font-weight: bold;">גרסה 2.9 ✔️</div>
       </div>
     </div>
 
@@ -1077,7 +1077,7 @@
       </div>
 
       <div style="display: flex; justify-content: center; align-items: center; gap: 8px; margin-top: 18px;">
-        <span style="font-size: 12px; color: #10b981; font-weight: bold;">גרסה 2.8 ✔️ (עדכון אוטומטי)</span>
+        <span style="font-size: 12px; color: #10b981; font-weight: bold;">גרסה 2.9 ✔️ (עדכון אוטומטי)</span>
         <button id="btn-force-refresh" style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #94a3b8; border-radius: 8px; font-size: 11px; padding: 3px 8px; cursor: pointer;">🔄 רענן</button>
       </div>
     </div>
@@ -1141,7 +1141,7 @@
               <div class="item-desc">מעניקה חסינות מוחלטת מכל נזק ל-3 שניות! שימוש חד-פעמי (ניתן לצבור מלאי).</div>
               <div id="shield-inventory-tag" style="font-size: 12px; color: #38bdf8; font-weight: bold; margin-top: 3px;">במלאי שלך: 0 🛡️</div>
             </div>
-            <button id="btn-buy-shield" class="btn-buy">45 🪙</button>
+            <button id="btn-buy-shield" class="btn-buy">70 🪙</button>
           </div>
         </div>
       </div>
@@ -3257,14 +3257,14 @@
         }
       }
 
-      // Shield Bubble Consumable (45 coins)
+      // Shield Bubble Consumable (70 coins)
       const btnShield = document.getElementById('btn-buy-shield');
       const shieldTag = document.getElementById('shield-inventory-tag');
       if (shieldTag) {
         shieldTag.textContent = `במלאי שלך: ${Game.shieldCount || 0} 🛡️`;
       }
       if (btnShield) {
-        if (Game.coins < 45) {
+        if (Game.coins < 70) {
           btnShield.className = 'btn-buy cant-afford';
         } else {
           btnShield.className = 'btn-buy';
@@ -3384,7 +3384,7 @@
         e.currentTarget.blur();
       }
       SoundEngine.init();
-      const cost = 45;
+      const cost = 70;
       if (Game.coins < cost) {
         SoundEngine.playError();
         showBanner('אין מספיק מטבעות!', `דרוש ${cost} מטבעות זהב`);
