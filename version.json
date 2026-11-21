@@ -1,13 +1,12 @@
 {
-  "version": "2.9",
-  "build": 1732185600,
-  "updatedAt": "2026-11-21T10:20:00Z",
+  "version": "3.0",
+  "build": 1732194000,
+  "updatedAt": "2026-11-21T10:45:00Z",
   "features": [
-    "Updated Shield Bubble (בועת מגן ל-3 שניות) price to 70 gold coins in shop",
-    "Consumable power-ups available in shop with stock inventory",
-    "Dedicated HUD shield button with stock counter badge and active timer countdown",
-    "Visual 3D glowing energy sphere around player during shield activation",
-    "100% damage immunity against all enemy attacks while shield is active",
-    "PC shortcut: press Q or E to activate shield bubble"
+    "Added Shockwave power-up (גל הדף) for 45 gold coins",
+    "Blasts and knocks back all nearby enemies violently away from the player with custom sound and ring VFX",
+    "Staggers enemies and interrupts their attacks",
+    "Dedicated HUD/screen button with live stock badge and keyboard shortcuts (R / F)",
+    "Shop inventory counter and persistent consumable storage"
   ]
 }

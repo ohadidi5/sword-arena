@@ -6,10 +6,10 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <title>זירת החרב - אויבים מיוחדים וקרבות גלים (v2.9)</title>
+  <title>זירת החרב - אויבים מיוחדים וקרבות גלים (v3.0)</title>
   <script>
     // AUTOMATIC AUTO-UPDATE & INSTANT CACHE-BUSTER ENGINE
-    const APP_VERSION = "2.9";
+    const APP_VERSION = "3.0";
     (function checkAutoUpdate() {
       try {
         const params = new URLSearchParams(window.location.search);
@@ -766,9 +766,9 @@
     .screen-shield-btn {
       position: absolute;
       bottom: 104px;
-      right: 22px;
-      width: 64px;
-      height: 64px;
+      right: 18px;
+      width: 62px;
+      height: 62px;
       border-radius: 50%;
       background: radial-gradient(circle, #0284c7, #0369a1);
       border: 2px solid rgba(56, 189, 248, 0.7);
@@ -827,6 +827,63 @@
       color: #e0f2fe;
     }
 
+    /* Consumable Shockwave HUD Button (גל הדף) */
+    .screen-shockwave-btn {
+      position: absolute;
+      bottom: 104px;
+      right: 88px;
+      width: 62px;
+      height: 62px;
+      border-radius: 50%;
+      background: radial-gradient(circle, #ea580c, #c2410c);
+      border: 2px solid rgba(251, 146, 60, 0.7);
+      box-shadow: 0 0 18px rgba(249, 115, 22, 0.5);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      cursor: pointer;
+      pointer-events: auto;
+      touch-action: manipulation;
+      user-select: none;
+      -webkit-user-select: none;
+      transition: transform 0.1s, opacity 0.2s, box-shadow 0.2s;
+      z-index: 50;
+    }
+    .screen-shockwave-btn:active {
+      transform: scale(0.92);
+      box-shadow: 0 0 25px rgba(249, 115, 22, 0.8);
+    }
+    .screen-shockwave-btn.empty {
+      opacity: 0.35;
+      box-shadow: none;
+      filter: grayscale(0.5);
+    }
+    .screen-shockwave-icon {
+      font-size: 24px;
+      line-height: 1;
+    }
+    .screen-shockwave-badge {
+      position: absolute;
+      top: -3px;
+      left: -3px;
+      background: #fbbf24;
+      color: #0f172a;
+      font-size: 11px;
+      font-weight: 900;
+      padding: 1px 6px;
+      border-radius: 10px;
+      border: 1px solid #ffffff;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+    }
+    .screen-shockwave-text {
+      font-size: 9px;
+      font-weight: 800;
+      margin-top: 2px;
+      color: #ffedd5;
+    }
+
     /* Landscape and Short Screen optimization so buttons are NEVER cut off */
     @media (max-height: 520px), (orientation: landscape) and (max-height: 600px) {
       #ui-layer {
@@ -856,7 +913,7 @@
       }
       .screen-shield-btn {
         bottom: 86px;
-        right: 18px;
+        right: 16px;
         width: 52px;
         height: 52px;
       }
@@ -864,6 +921,18 @@
         font-size: 19px;
       }
       .screen-shield-text {
+        font-size: 8px;
+      }
+      .screen-shockwave-btn {
+        bottom: 86px;
+        right: 74px;
+        width: 52px;
+        height: 52px;
+      }
+      .screen-shockwave-icon {
+        font-size: 19px;
+      }
+      .screen-shockwave-text {
         font-size: 8px;
       }
       #game-over-screen, #start-screen {
@@ -1017,7 +1086,7 @@
       <div class="hud-card wave-badge">
         <div class="wave-title">גל <span id="wave-display" class="wave-number">1</span></div>
         <div id="enemies-remaining" class="wave-remaining">אויבים: 3</div>
-        <div style="font-size: 9px; color: #10b981; font-weight: bold;">גרסה 2.9 ✔️</div>
+        <div style="font-size: 9px; color: #10b981; font-weight: bold;">גרסה 3.0 ✔️</div>
       </div>
     </div>
 
@@ -1046,6 +1115,13 @@
       <span id="screen-shield-badge" class="screen-shield-badge">0</span>
       <span class="screen-shield-icon">🛡️</span>
       <span id="screen-shield-text" class="screen-shield-text">מגן</span>
+    </div>
+
+    <!-- כפתור שימוש בגל הדף חד-פעמי (מעיף אויבים) -->
+    <div id="btn-screen-shockwave" class="screen-shockwave-btn empty" aria-label="גל הדף (מעיף אויבים)">
+      <span id="screen-shockwave-badge" class="screen-shockwave-badge">0</span>
+      <span class="screen-shockwave-icon">💥</span>
+      <span id="screen-shockwave-text" class="screen-shockwave-text">הדף</span>
     </div>
 
     <!-- כפתור חרב ייעודי וגדול בצד ימין -->
@@ -1077,7 +1153,7 @@
       </div>
 
       <div style="display: flex; justify-content: center; align-items: center; gap: 8px; margin-top: 18px;">
-        <span style="font-size: 12px; color: #10b981; font-weight: bold;">גרסה 2.9 ✔️ (עדכון אוטומטי)</span>
+        <span style="font-size: 12px; color: #10b981; font-weight: bold;">גרסה 3.0 ✔️ (עדכון אוטומטי)</span>
         <button id="btn-force-refresh" style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #94a3b8; border-radius: 8px; font-size: 11px; padding: 3px 8px; cursor: pointer;">🔄 רענן</button>
       </div>
     </div>
@@ -1142,6 +1218,17 @@
               <div id="shield-inventory-tag" style="font-size: 12px; color: #38bdf8; font-weight: bold; margin-top: 3px;">במלאי שלך: 0 🛡️</div>
             </div>
             <button id="btn-buy-shield" class="btn-buy">70 🪙</button>
+          </div>
+
+          <!-- Shockwave Consumable Power-up (גל הדף - 45 מטבעות) -->
+          <div class="shop-item-card">
+            <div class="item-icon-box" style="background: rgba(249, 115, 22, 0.15); border: 1px solid rgba(249, 115, 22, 0.3);">💥💨</div>
+            <div class="item-details">
+              <div class="item-title">גל הדף (חד-פעמי)</div>
+              <div class="item-desc">משחרר פיצוץ הדף אדיר שמעיף את כל האויבים בסביבתך אחורה! שימוש חד-פעמי (ניתן לצבור מלאי).</div>
+              <div id="shockwave-inventory-tag" style="font-size: 12px; color: #fb923c; font-weight: bold; margin-top: 3px;">במלאי שלך: 0 💥</div>
+            </div>
+            <button id="btn-buy-shockwave" class="btn-buy">45 🪙</button>
           </div>
         </div>
       </div>
@@ -1441,6 +1528,43 @@
         gain.connect(this.ctx.destination);
         osc.start(now);
         osc.stop(now + 0.22);
+      },
+      playShockwave() {
+        if (!this.ctx) return;
+        const now = this.ctx.currentTime;
+        // Deep explosive sub bass boom
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sawtooth';
+        osc.frequency.setValueAtTime(140, now);
+        osc.frequency.exponentialRampToValueAtTime(32, now + 0.45);
+        gain.gain.setValueAtTime(0.7, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.45);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.45);
+
+        // White noise burst for blast impact
+        const bufferSize = this.ctx.sampleRate * 0.35;
+        const buffer = this.ctx.createBuffer(1, bufferSize, this.ctx.sampleRate);
+        const data = buffer.getChannelData(0);
+        for (let i = 0; i < bufferSize; i++) {
+          data[i] = (Math.random() * 2 - 1) * Math.exp(-i / (bufferSize * 0.25));
+        }
+        const noise = this.ctx.createBufferSource();
+        noise.buffer = buffer;
+        const filter = this.ctx.createBiquadFilter();
+        filter.type = 'lowpass';
+        filter.frequency.setValueAtTime(900, now);
+        filter.frequency.exponentialRampToValueAtTime(100, now + 0.35);
+        const noiseGain = this.ctx.createGain();
+        noiseGain.gain.setValueAtTime(0.55, now);
+        noiseGain.gain.exponentialRampToValueAtTime(0.01, now + 0.35);
+        noise.connect(filter);
+        filter.connect(noiseGain);
+        noiseGain.connect(this.ctx.destination);
+        noise.start(now);
       }
     };
 
@@ -1485,10 +1609,11 @@
         speedBonus: 0
       },
 
-      // Consumable Power-ups (בועת מגן ל-3 שניות)
+      // Consumable Power-ups (בועת מגן וגל הדף)
       shieldCount: 0,
       shieldActive: false,
       shieldTimer: 0,
+      shockwaveCount: 0,
 
       // Slow Motion state
       slowMoActive: false,
@@ -1500,6 +1625,7 @@
       particles: [],
       floatingTexts: [],
       whirlwindRings: [],
+      shockwaves: [],
 
       // Controls
       inputMove: false,
@@ -2041,6 +2167,46 @@
         mesh: ringMesh,
         scale: 0.6,
         life: 0.4
+      });
+    }
+
+    function spawnShockwaveVFX(position) {
+      // Inner expanding bright ring
+      const ringGeo = new THREE.RingGeometry(0.8, 2.2, 36);
+      const ringMat = new THREE.MeshBasicMaterial({
+        color: 0xffedd5,
+        side: THREE.DoubleSide,
+        transparent: true,
+        opacity: 0.95,
+        blending: THREE.AdditiveBlending
+      });
+      const ringMesh = new THREE.Mesh(ringGeo, ringMat);
+      ringMesh.rotation.x = Math.PI / 2;
+      ringMesh.position.copy(position);
+      ringMesh.position.y = 0.4;
+      scene.add(ringMesh);
+
+      // Outer orange blast ripple
+      const ringGeo2 = new THREE.RingGeometry(0.5, 3.2, 36);
+      const ringMat2 = new THREE.MeshBasicMaterial({
+        color: 0xf97316,
+        side: THREE.DoubleSide,
+        transparent: true,
+        opacity: 0.8,
+        blending: THREE.AdditiveBlending
+      });
+      const ringMesh2 = new THREE.Mesh(ringGeo2, ringMat2);
+      ringMesh2.rotation.x = Math.PI / 2;
+      ringMesh2.position.copy(position);
+      ringMesh2.position.y = 0.35;
+      scene.add(ringMesh2);
+
+      Game.shockwaves.push({
+        mesh: ringMesh,
+        mesh2: ringMesh2,
+        scale: 0.6,
+        life: 0.45,
+        maxLife: 0.45
       });
     }
 
@@ -2619,6 +2785,7 @@
       if (e.target.closest('#joystick-base') || 
           e.target.closest('#btn-screen-attack') || 
           e.target.closest('#btn-screen-shield') || 
+          e.target.closest('#btn-screen-shockwave') || 
           e.target.closest('button') || 
           e.target.closest('#game-over-screen') || 
           e.target.closest('#shop-modal') || 
@@ -2785,6 +2952,7 @@
       }
 
       updateWhirlwindRings(gameDelta);
+      updateShockwaves(gameDelta);
       updateParticles(gameDelta);
       updateDamageTexts(gameDelta);
       updateThirdPersonCamera(realDelta);
@@ -3197,6 +3365,26 @@
       }
     }
 
+    function updateShockwaves(dt) {
+      for (let i = Game.shockwaves.length - 1; i >= 0; i--) {
+        const sw = Game.shockwaves[i];
+        sw.life -= dt;
+        sw.scale += dt * 26.0;
+        sw.mesh.scale.set(sw.scale, sw.scale, sw.scale);
+        sw.mesh2.scale.set(sw.scale * 1.15, sw.scale * 1.15, sw.scale * 1.15);
+        sw.mesh.rotation.z += dt * 6;
+        sw.mesh2.rotation.z -= dt * 6;
+        const alpha = Math.max(0, sw.life / sw.maxLife);
+        sw.mesh.material.opacity = alpha * 0.95;
+        sw.mesh2.material.opacity = alpha * 0.75;
+        if (sw.life <= 0) {
+          scene.remove(sw.mesh);
+          scene.remove(sw.mesh2);
+          Game.shockwaves.splice(i, 1);
+        }
+      }
+    }
+
     /* =========================================================
        COINS & REWARDS SYSTEM
        ========================================================= */
@@ -3270,6 +3458,20 @@
           btnShield.className = 'btn-buy';
         }
       }
+
+      // Shockwave Consumable (45 coins)
+      const btnShockwave = document.getElementById('btn-buy-shockwave');
+      const shockwaveTag = document.getElementById('shockwave-inventory-tag');
+      if (shockwaveTag) {
+        shockwaveTag.textContent = `במלאי שלך: ${Game.shockwaveCount || 0} 💥`;
+      }
+      if (btnShockwave) {
+        if (Game.coins < 45) {
+          btnShockwave.className = 'btn-buy cant-afford';
+        } else {
+          btnShockwave.className = 'btn-buy';
+        }
+      }
     }
 
     function loadSavedData() {
@@ -3289,6 +3491,11 @@
           Game.shieldCount = parseInt(savedShield, 10) || 0;
         }
 
+        const savedShockwave = localStorage.getItem('sword_arena_powerup_shockwave');
+        if (savedShockwave !== null) {
+          Game.shockwaveCount = parseInt(savedShockwave, 10) || 0;
+        }
+
         // Reset legacy permanent powerups
         CONFIG.PLAYER_MAX_HP = 100;
         CONFIG.PLAYER_DAMAGE = 10;
@@ -3303,6 +3510,7 @@
       }
       updateCoinsUI();
       updateShieldHUD();
+      updateShockwaveHUD();
     }
 
     /* =========================================================
@@ -3460,6 +3668,129 @@
       }
     }
 
+    function buyShockwavePowerup(e) {
+      if (e && e.currentTarget && typeof e.currentTarget.blur === 'function') {
+        e.currentTarget.blur();
+      }
+      SoundEngine.init();
+      const cost = 45;
+      if (Game.coins < cost) {
+        SoundEngine.playError();
+        showBanner('אין מספיק מטבעות!', `דרוש ${cost} מטבעות זהב`);
+        return;
+      }
+
+      Game.coins -= cost;
+      Game.shockwaveCount = (Game.shockwaveCount || 0) + 1;
+      try {
+        localStorage.setItem('sword_arena_coins', Game.coins);
+        localStorage.setItem('sword_arena_powerup_shockwave', Game.shockwaveCount);
+      } catch (e) {}
+
+      SoundEngine.playBuy();
+      updateCoinsUI();
+      updateShockwaveHUD();
+      showBanner('+1 גל הדף נרכש! 💥', `סה"כ במלאי: ${Game.shockwaveCount} גלי הדף`);
+      const sc = document.getElementById('shop-content');
+      if (sc) sc.scrollTop = 0;
+    }
+
+    function activateShockwave() {
+      if (Game.isGameOver || !Game.isStarted) return;
+      if (!Game.shockwaveCount || Game.shockwaveCount <= 0) {
+        SoundEngine.playError();
+        showBanner('אין גל הדף במלאי!', 'קנה גל הדף בחנות השדרוגים (45 🪙) 🛒');
+        return;
+      }
+
+      Game.shockwaveCount--;
+      try {
+        localStorage.setItem('sword_arena_powerup_shockwave', Game.shockwaveCount);
+      } catch (e) {}
+
+      SoundEngine.playShockwave();
+      const pPos = playerModel.mesh.position.clone();
+      spawnShockwaveVFX(pPos);
+
+      // Push all nearby alive enemies backward away from player!
+      const pushRadius = 14.0;
+      let knockedCount = 0;
+
+      for (let i = 0; i < enemies.length; i++) {
+        const enemy = enemies[i];
+        if (!enemy || enemy.isDead) continue;
+
+        const ePos = enemy.mesh.position;
+        const dx = ePos.x - pPos.x;
+        const dz = ePos.z - pPos.z;
+        const dist = Math.sqrt(dx * dx + dz * dz);
+
+        if (dist <= pushRadius) {
+          knockedCount++;
+          // Direction vector away from player
+          let dirX = dx;
+          let dirZ = dz;
+          if (dist < 0.001) {
+            dirX = Math.cos(Math.random() * Math.PI * 2);
+            dirZ = Math.sin(Math.random() * Math.PI * 2);
+          } else {
+            dirX /= dist;
+            dirZ /= dist;
+          }
+
+          // Force drops slightly with distance, minimum ~7.2 units knockback, maximum ~12.0 units knockback
+          const force = 12.0 * (1.0 - (dist / pushRadius) * 0.4);
+          ePos.x += dirX * force;
+          ePos.z += dirZ * force;
+
+          // Clamp inside arena boundary
+          const maxR = CONFIG.ARENA_RADIUS - 1.2;
+          const currentR = Math.sqrt(ePos.x * ePos.x + ePos.z * ePos.z);
+          if (currentR > maxR) {
+            ePos.x = (ePos.x / currentR) * maxR;
+            ePos.z = (ePos.z / currentR) * maxR;
+          }
+
+          // Stagger enemy (interrupt attack & reset cooldown)
+          enemy.attackCooldown = Math.max(enemy.attackCooldown || 0, 1.3);
+          enemy.punchAnimationTime = 0;
+          if (enemy.rightArm) enemy.rightArm.rotation.x = 0;
+
+          // Visual effect on enemy
+          spawnDamageText(ePos.clone(), '💨 נהדף!', false, '#fb923c');
+          spawnParticles(ePos.clone(), 6, '#ea580c');
+        }
+      }
+
+      updateShockwaveHUD();
+      spawnDamageText(pPos, '💥 גל הדף!', false, '#f97316');
+      if (knockedCount > 0) {
+        showBanner('💥 גל הדף הופעל!', `${knockedCount} אויבים הועפו אחורה בעוצמה!`);
+      } else {
+        showBanner('💥 גל הדף הופעל!', 'האויבים הועפו אחורה!');
+      }
+    }
+
+    function updateShockwaveHUD() {
+      const btn = document.getElementById('btn-screen-shockwave');
+      const badge = document.getElementById('screen-shockwave-badge');
+      if (!btn) return;
+
+      const count = Game.shockwaveCount || 0;
+      if (badge) badge.textContent = count;
+
+      if (count > 0) {
+        btn.classList.remove('empty');
+      } else {
+        btn.classList.add('empty');
+      }
+
+      const shockwaveTag = document.getElementById('shockwave-inventory-tag');
+      if (shockwaveTag) {
+        shockwaveTag.textContent = `במלאי שלך: ${count} 💥`;
+      }
+    }
+
     function startGame() {
       SoundEngine.init();
       document.getElementById('start-screen').classList.remove('active');
@@ -3493,10 +3824,27 @@
       });
     }
 
-    // Keyboard shortcut Q or E for quick shield bubble activation on PC
+    const btnBuyShockwave = document.getElementById('btn-buy-shockwave');
+    if (btnBuyShockwave) {
+      btnBuyShockwave.addEventListener('click', buyShockwavePowerup);
+    }
+
+    const btnScreenShockwave = document.getElementById('btn-screen-shockwave');
+    if (btnScreenShockwave) {
+      btnScreenShockwave.addEventListener('pointerdown', (e) => {
+        e.stopPropagation();
+        e.preventDefault();
+        activateShockwave();
+      });
+    }
+
+    // Keyboard shortcut Q/E for shield bubble, R/F for shockwave on PC
     window.addEventListener('keydown', (e) => {
       if (e.key === 'q' || e.key === 'Q' || e.key === 'e' || e.key === 'E') {
         activateShieldBubble();
+      }
+      if (e.key === 'r' || e.key === 'R' || e.key === 'f' || e.key === 'F') {
+        activateShockwave();
       }
     });
     // Force Refresh & Cache Clear
