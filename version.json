@@ -1,11 +1,11 @@
 {
-  "version": "2.6",
-  "build": 1732174000,
-  "updatedAt": "2026-11-21T07:08:00Z",
+  "version": "2.7",
+  "build": 1732174500,
+  "updatedAt": "2026-11-21T07:15:00Z",
   "features": [
-    "Removed all powerups from shop as requested (new powerups added only on demand)",
-    "Pure player base stats restored",
-    "Special Abilities category with 360 degree sword strike preserved",
-    "Persistent High Score Wave (גל שיא) always displayed at the top right"
+    "Fixed shop item display on mobile landscape to prevent 360 ability card from being cut off or obscured",
+    "Added automatic scroll-to-top on shop open and tab switch",
+    "Added mobile landscape responsive styling for shop modal and cards",
+    "Removed all powerups as requested, special abilities preserved"
   ]
 }
