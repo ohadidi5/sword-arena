@@ -1,12 +1,11 @@
 {
-  "version": "2.0",
-  "build": 1732170850,
-  "updatedAt": "2026-11-21T06:14:00Z",
+  "version": "2.1",
+  "build": 1732171200,
+  "updatedAt": "2026-11-21T06:20:00Z",
   "features": [
-    "HP scaling per wave for all enemies",
-    "Special enemy: Shield Guard (blue, front damage immunity, backstab only)",
-    "Special enemy: Assassin (purple, teleports behind player)",
-    "Special enemy: Healer (green, channels green light beam, heals 2 allies 5% HP/s)",
-    "Custom unique 3D models, colors and floating Hebrew name tags for each enemy type"
+    "Shield Guard rotates 35% slower for smoother tactical backstabs",
+    "Shield Guard cannot punch or hit player when player is behind him",
+    "Special enemies: Shield Guard, Assassin, Healer with green beam",
+    "Wave HP scaling and overhead tags"
   ]
 }
