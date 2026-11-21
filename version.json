@@ -1,12 +1,13 @@
 {
-  "version": "2.4",
-  "build": 1732172500,
-  "updatedAt": "2026-11-21T06:41:00Z",
+  "version": "2.5",
+  "build": 1732173800,
+  "updatedAt": "2026-11-21T07:03:00Z",
   "features": [
-    "Shield Guard rotation speed tuned 15% faster (0.51 rad/s) for balanced agility",
+    "Fixed shop tab separation: 360 degree sword strike is strictly in Special Abilities category",
+    "Switching to Powerups tab strictly hides Special Abilities",
     "Persistent High Score Wave (גל שיא) always displayed at the top right",
+    "Shield Guard rotation speed tuned for responsive backstabs (0.51 rad/s)",
     "Shield mesh angled directly forward",
-    "Paced wave roster (only 1 shield guard in wave 2)",
-    "Special enemies: Shield Guard, Assassin, Healer with green beam"
+    "Gradual wave progression (only 1 shield guard in wave 2)"
   ]
 }

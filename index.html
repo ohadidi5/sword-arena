@@ -6,10 +6,10 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <title>זירת החרב - אויבים מיוחדים וקרבות גלים (v2.4)</title>
+  <title>זירת החרב - אויבים מיוחדים וקרבות גלים (v2.5)</title>
   <script>
     // AUTOMATIC AUTO-UPDATE & INSTANT CACHE-BUSTER ENGINE
-    const APP_VERSION = "2.4";
+    const APP_VERSION = "2.5";
     (function checkAutoUpdate() {
       try {
         const params = new URLSearchParams(window.location.search);
@@ -871,7 +871,7 @@
       <div class="hud-card wave-badge">
         <div class="wave-title">גל <span id="wave-display" class="wave-number">1</span></div>
         <div id="enemies-remaining" class="wave-remaining">אויבים: 3</div>
-        <div style="font-size: 9px; color: #10b981; font-weight: bold;">גרסה 2.4 ✔️</div>
+        <div style="font-size: 9px; color: #10b981; font-weight: bold;">גרסה 2.5 ✔️</div>
       </div>
     </div>
 
@@ -924,7 +924,7 @@
       </div>
 
       <div style="display: flex; justify-content: center; align-items: center; gap: 8px; margin-top: 18px;">
-        <span style="font-size: 12px; color: #10b981; font-weight: bold;">גרסה 2.4 ✔️ (עדכון אוטומטי)</span>
+        <span style="font-size: 12px; color: #10b981; font-weight: bold;">גרסה 2.5 ✔️ (עדכון אוטומטי)</span>
         <button id="btn-force-refresh" style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #94a3b8; border-radius: 8px; font-size: 11px; padding: 3px 8px; cursor: pointer;">🔄 רענן</button>
       </div>
     </div>
@@ -3121,10 +3121,11 @@
     /* =========================================================
        SHOP LOGIC & CATEGORIES
        ========================================================= */
-    function openShop() {
+    function openShop(defaultTab = 'abilities') {
       SoundEngine.init();
       Game.isShopOpen = true;
       updateCoinsUI();
+      switchShopTab(defaultTab);
       document.getElementById('shop-modal').classList.add('active');
     }
 
@@ -3149,7 +3150,7 @@
         tabPowerups.classList.add('active');
         tabAbilities.classList.remove('active');
         panePowerups.classList.add('active');
-        panePowerups.classList.remove('active');
+        paneAbilities.classList.remove('active'); // Special Abilities pane strictly hidden in powerups tab
       }
     }
 
