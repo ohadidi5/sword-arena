@@ -1,11 +1,13 @@
 {
-  "version": "2.7",
-  "build": 1732174500,
-  "updatedAt": "2026-11-21T07:15:00Z",
+  "version": "2.8",
+  "build": 1732175400,
+  "updatedAt": "2026-11-21T07:30:00Z",
   "features": [
-    "Fixed shop item display on mobile landscape to prevent 360 ability card from being cut off or obscured",
-    "Added automatic scroll-to-top on shop open and tab switch",
-    "Added mobile landscape responsive styling for shop modal and cards",
-    "Removed all powerups as requested, special abilities preserved"
+    "Added 3-second Invulnerability Shield Bubble (בועת מגן ל-3 שניות) consumable power-up",
+    "Consumable power-ups available in shop (45 gold) with stock inventory",
+    "Dedicated HUD shield button with stock counter badge and active timer countdown",
+    "Visual 3D glowing energy sphere around player during shield activation",
+    "100% damage immunity against all enemy attacks while shield is active",
+    "PC shortcut: press Q or E to activate shield bubble"
   ]
 }

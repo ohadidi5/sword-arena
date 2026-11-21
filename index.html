@@ -6,10 +6,10 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <title>זירת החרב - אויבים מיוחדים וקרבות גלים (v2.7)</title>
+  <title>זירת החרב - אויבים מיוחדים וקרבות גלים (v2.8)</title>
   <script>
     // AUTOMATIC AUTO-UPDATE & INSTANT CACHE-BUSTER ENGINE
-    const APP_VERSION = "2.7";
+    const APP_VERSION = "2.8";
     (function checkAutoUpdate() {
       try {
         const params = new URLSearchParams(window.location.search);
@@ -762,6 +762,71 @@
       letter-spacing: 0.5px;
     }
 
+    /* Consumable Shield Bubble HUD Button */
+    .screen-shield-btn {
+      position: absolute;
+      bottom: 104px;
+      right: 22px;
+      width: 64px;
+      height: 64px;
+      border-radius: 50%;
+      background: radial-gradient(circle, #0284c7, #0369a1);
+      border: 2px solid rgba(56, 189, 248, 0.7);
+      box-shadow: 0 0 18px rgba(56, 189, 248, 0.5);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      cursor: pointer;
+      pointer-events: auto;
+      touch-action: manipulation;
+      user-select: none;
+      -webkit-user-select: none;
+      transition: transform 0.1s, opacity 0.2s, box-shadow 0.2s;
+      z-index: 50;
+    }
+    .screen-shield-btn:active {
+      transform: scale(0.92);
+    }
+    .screen-shield-btn.empty {
+      opacity: 0.35;
+      box-shadow: none;
+      filter: grayscale(0.5);
+    }
+    .screen-shield-btn.active {
+      border-color: #38bdf8;
+      box-shadow: 0 0 25px #38bdf8, 0 0 40px rgba(56, 189, 248, 0.8);
+      animation: pulseShieldBtn 1s infinite alternate;
+    }
+    @keyframes pulseShieldBtn {
+      0% { transform: scale(1); }
+      100% { transform: scale(1.08); }
+    }
+    .screen-shield-icon {
+      font-size: 24px;
+      line-height: 1;
+    }
+    .screen-shield-badge {
+      position: absolute;
+      top: -3px;
+      left: -3px;
+      background: #fbbf24;
+      color: #0f172a;
+      font-size: 11px;
+      font-weight: 900;
+      padding: 1px 6px;
+      border-radius: 10px;
+      border: 1px solid #ffffff;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+    }
+    .screen-shield-text {
+      font-size: 9px;
+      font-weight: 800;
+      margin-top: 2px;
+      color: #e0f2fe;
+    }
+
     /* Landscape and Short Screen optimization so buttons are NEVER cut off */
     @media (max-height: 520px), (orientation: landscape) and (max-height: 600px) {
       #ui-layer {
@@ -788,6 +853,18 @@
         right: 10px;
         width: 72px;
         height: 72px;
+      }
+      .screen-shield-btn {
+        bottom: 86px;
+        right: 18px;
+        width: 52px;
+        height: 52px;
+      }
+      .screen-shield-icon {
+        font-size: 19px;
+      }
+      .screen-shield-text {
+        font-size: 8px;
       }
       #game-over-screen, #start-screen {
         padding: 6px 12px;
@@ -940,7 +1017,7 @@
       <div class="hud-card wave-badge">
         <div class="wave-title">גל <span id="wave-display" class="wave-number">1</span></div>
         <div id="enemies-remaining" class="wave-remaining">אויבים: 3</div>
-        <div style="font-size: 9px; color: #10b981; font-weight: bold;">גרסה 2.7 ✔️</div>
+        <div style="font-size: 9px; color: #10b981; font-weight: bold;">גרסה 2.8 ✔️</div>
       </div>
     </div>
 
@@ -962,6 +1039,13 @@
         <span class="dir-arrow dir-right">▶</span>
         <div id="joystick-knob" class="joystick-knob">🕹️</div>
       </div>
+    </div>
+
+    <!-- כפתור שימוש בבועת מגן חד-פעמית (3 שניות חסינות מוחלטת) -->
+    <div id="btn-screen-shield" class="screen-shield-btn empty" aria-label="בועת מגן (3 שניות)">
+      <span id="screen-shield-badge" class="screen-shield-badge">0</span>
+      <span class="screen-shield-icon">🛡️</span>
+      <span id="screen-shield-text" class="screen-shield-text">מגן</span>
     </div>
 
     <!-- כפתור חרב ייעודי וגדול בצד ימין -->
@@ -993,7 +1077,7 @@
       </div>
 
       <div style="display: flex; justify-content: center; align-items: center; gap: 8px; margin-top: 18px;">
-        <span style="font-size: 12px; color: #10b981; font-weight: bold;">גרסה 2.7 ✔️ (עדכון אוטומטי)</span>
+        <span style="font-size: 12px; color: #10b981; font-weight: bold;">גרסה 2.8 ✔️ (עדכון אוטומטי)</span>
         <button id="btn-force-refresh" style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #94a3b8; border-radius: 8px; font-size: 11px; padding: 3px 8px; cursor: pointer;">🔄 רענן</button>
       </div>
     </div>
@@ -1047,12 +1131,17 @@
           </div>
         </div>
 
-        <!-- Tab 2: Power-ups (פאוור-אפים) -->
+        <!-- Tab 2: Power-ups (פאוור-אפים חד-פעמיים) -->
         <div id="tab-pane-powerups" class="shop-tab-pane">
-          <div style="text-align: center; padding: 40px 20px; color: #94a3b8;">
-            <div style="font-size: 40px; margin-bottom: 12px;">⚡</div>
-            <div style="font-size: 16px; font-weight: bold; color: #cbd5e1; margin-bottom: 8px;">קטגוריית פאוור-אפים</div>
-            <div style="font-size: 13px; color: #64748b; line-height: 1.5;">הקטגוריה ריקה כרגע.<br>פאוור-אפים חדשים יתווספו לכאן רק לפי בקשתך!</div>
+          <!-- 3-Second Shield Bubble Consumable -->
+          <div class="shop-item-card">
+            <div class="item-icon-box" style="background: rgba(56, 189, 248, 0.15); border: 1px solid rgba(56, 189, 248, 0.3);">🛡️✨</div>
+            <div class="item-details">
+              <div class="item-title">בועת מגן - 3 שניות (חד-פעמי)</div>
+              <div class="item-desc">מעניקה חסינות מוחלטת מכל נזק ל-3 שניות! שימוש חד-פעמי (ניתן לצבור מלאי).</div>
+              <div id="shield-inventory-tag" style="font-size: 12px; color: #38bdf8; font-weight: bold; margin-top: 3px;">במלאי שלך: 0 🛡️</div>
+            </div>
+            <button id="btn-buy-shield" class="btn-buy">45 🪙</button>
           </div>
         </div>
       </div>
@@ -1321,6 +1410,37 @@
           osc.start(now + idx * 0.04);
           osc.stop(now + idx * 0.04 + 0.28);
         });
+      },
+      playShieldActivate() {
+        if (!this.ctx) return;
+        const now = this.ctx.currentTime;
+        [523.25, 659.25, 783.99, 1046.50].forEach((freq, idx) => {
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(freq, now + idx * 0.05);
+          gain.gain.setValueAtTime(0.22, now + idx * 0.05);
+          gain.gain.exponentialRampToValueAtTime(0.01, now + idx * 0.05 + 0.35);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(now + idx * 0.05);
+          osc.stop(now + idx * 0.05 + 0.35);
+        });
+      },
+      playShieldDeactivate() {
+        if (!this.ctx) return;
+        const now = this.ctx.currentTime;
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(800, now);
+        osc.frequency.exponentialRampToValueAtTime(250, now + 0.22);
+        gain.gain.setValueAtTime(0.2, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.22);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.22);
       }
     };
 
@@ -1364,6 +1484,11 @@
         dmgBonus: 0,
         speedBonus: 0
       },
+
+      // Consumable Power-ups (בועת מגן ל-3 שניות)
+      shieldCount: 0,
+      shieldActive: false,
+      shieldTimer: 0,
 
       // Slow Motion state
       slowMoActive: false,
@@ -1601,9 +1726,27 @@
       let swordMesh = null;
       let swordTrail = null;
       let shieldMesh = null;
+      let shieldBubbleMesh = null;
 
-      // Player gets a Katana / Sword
+      // Player gets a Katana / Sword and Energy Shield Bubble
       if (!isEnemy) {
+        // 3D Protective Energy Shield Bubble
+        const bubbleGeo = new THREE.SphereGeometry(1.65, 24, 24);
+        const bubbleMat = new THREE.MeshStandardMaterial({
+          color: 0x38bdf8,
+          emissive: 0x0284c7,
+          emissiveIntensity: 0.8,
+          transparent: true,
+          opacity: 0.35,
+          roughness: 0.1,
+          metalness: 0.3,
+          side: THREE.DoubleSide
+        });
+        shieldBubbleMesh = new THREE.Mesh(bubbleGeo, bubbleMat);
+        shieldBubbleMesh.position.y = 1.1;
+        shieldBubbleMesh.visible = false;
+        group.add(shieldBubbleMesh);
+
         const swordGroup = new THREE.Group();
         swordGroup.position.set(0, -0.65, 0.2);
         swordGroup.rotation.x = Math.PI / 2.2;
@@ -1769,6 +1912,7 @@
         swordMesh,
         swordTrail,
         shieldMesh,
+        shieldBubbleMesh,
         healthBar
       };
     }
@@ -2268,6 +2412,15 @@
 
     function damagePlayer(amount) {
       if (Game.isGameOver) return;
+
+      // Invulnerability Bubble Shield (3 seconds 100% block)
+      if (Game.shieldActive) {
+        SoundEngine.playShieldBlock();
+        spawnHitParticles(playerModel.mesh.position, 0x38bdf8, 14);
+        spawnDamageText(playerModel.mesh.position, '🛡️ נחסם!', false, '#38bdf8');
+        return; // Complete immunity!
+      }
+
       Game.playerHp = Math.max(0, Game.playerHp - amount);
       SoundEngine.playHitPlayer();
 
@@ -2465,6 +2618,7 @@
       // Ignore if clicking joystick or buttons or active screens
       if (e.target.closest('#joystick-base') || 
           e.target.closest('#btn-screen-attack') || 
+          e.target.closest('#btn-screen-shield') || 
           e.target.closest('button') || 
           e.target.closest('#game-over-screen') || 
           e.target.closest('#shop-modal') || 
@@ -2728,6 +2882,32 @@
         // Sword ready stance
         playerModel.rightArmPivot.rotation.x = THREE.MathUtils.lerp(playerModel.rightArmPivot.rotation.x, -0.4, 0.15);
         playerModel.rightArmPivot.rotation.y = THREE.MathUtils.lerp(playerModel.rightArmPivot.rotation.y, 0.2, 0.15);
+      }
+
+      // Update Shield Bubble timer & visual 3D sphere
+      if (Game.shieldActive) {
+        Game.shieldTimer -= realDt;
+        if (playerModel.shieldBubbleMesh) {
+          playerModel.shieldBubbleMesh.visible = true;
+          const pulse = 1.0 + Math.sin(Date.now() * 0.012) * 0.05;
+          playerModel.shieldBubbleMesh.scale.set(pulse, pulse, pulse);
+          playerModel.shieldBubbleMesh.material.opacity = 0.38 + Math.sin(Date.now() * 0.015) * 0.12;
+          playerModel.shieldBubbleMesh.rotation.y += realDt * 1.8;
+        }
+        updateShieldHUD();
+        if (Game.shieldTimer <= 0) {
+          Game.shieldActive = false;
+          Game.shieldTimer = 0;
+          if (playerModel.shieldBubbleMesh) {
+            playerModel.shieldBubbleMesh.visible = false;
+          }
+          SoundEngine.playShieldDeactivate();
+          updateShieldHUD();
+        }
+      } else {
+        if (playerModel.shieldBubbleMesh && playerModel.shieldBubbleMesh.visible) {
+          playerModel.shieldBubbleMesh.visible = false;
+        }
       }
     }
 
@@ -3077,6 +3257,19 @@
         }
       }
 
+      // Shield Bubble Consumable (45 coins)
+      const btnShield = document.getElementById('btn-buy-shield');
+      const shieldTag = document.getElementById('shield-inventory-tag');
+      if (shieldTag) {
+        shieldTag.textContent = `במלאי שלך: ${Game.shieldCount || 0} 🛡️`;
+      }
+      if (btnShield) {
+        if (Game.coins < 45) {
+          btnShield.className = 'btn-buy cant-afford';
+        } else {
+          btnShield.className = 'btn-buy';
+        }
+      }
     }
 
     function loadSavedData() {
@@ -3091,7 +3284,12 @@
           Game.abilities.whirlwind360 = true;
         }
 
-        // Reset powerups - active only when explicitly requested
+        const savedShield = localStorage.getItem('sword_arena_powerup_shield');
+        if (savedShield !== null) {
+          Game.shieldCount = parseInt(savedShield, 10) || 0;
+        }
+
+        // Reset legacy permanent powerups
         CONFIG.PLAYER_MAX_HP = 100;
         CONFIG.PLAYER_DAMAGE = 10;
         Game.powerups = { hpBonus: 0, dmgBonus: 0, speedBonus: 0 };
@@ -3104,6 +3302,7 @@
         console.warn('Storage unavailable', e);
       }
       updateCoinsUI();
+      updateShieldHUD();
     }
 
     /* =========================================================
@@ -3180,6 +3379,87 @@
       if (sc) sc.scrollTop = 0;
     }
 
+    function buyShieldPowerup(e) {
+      if (e && e.currentTarget && typeof e.currentTarget.blur === 'function') {
+        e.currentTarget.blur();
+      }
+      SoundEngine.init();
+      const cost = 45;
+      if (Game.coins < cost) {
+        SoundEngine.playError();
+        showBanner('אין מספיק מטבעות!', `דרוש ${cost} מטבעות זהב`);
+        return;
+      }
+
+      Game.coins -= cost;
+      Game.shieldCount = (Game.shieldCount || 0) + 1;
+      try {
+        localStorage.setItem('sword_arena_coins', Game.coins);
+        localStorage.setItem('sword_arena_powerup_shield', Game.shieldCount);
+      } catch (e) {}
+
+      SoundEngine.playBuy();
+      updateCoinsUI();
+      updateShieldHUD();
+      showBanner('+1 בועת מגן נרכשה! 🛡️', `סה"כ במלאי: ${Game.shieldCount} בועות מגן`);
+      const sc = document.getElementById('shop-content');
+      if (sc) sc.scrollTop = 0;
+    }
+
+    function activateShieldBubble() {
+      if (Game.isGameOver || !Game.isStarted) return;
+      if (Game.shieldActive) return; // already active
+      if (!Game.shieldCount || Game.shieldCount <= 0) {
+        SoundEngine.playError();
+        showBanner('אין בועות מגן במלאי!', 'קנה בועת מגן בחנות השדרוגים 🛒');
+        return;
+      }
+
+      Game.shieldCount--;
+      try {
+        localStorage.setItem('sword_arena_powerup_shield', Game.shieldCount);
+      } catch (e) {}
+
+      Game.shieldActive = true;
+      Game.shieldTimer = 3.0; // 3 SECONDS INVULNERABILITY!
+      if (playerModel.shieldBubbleMesh) {
+        playerModel.shieldBubbleMesh.visible = true;
+      }
+      SoundEngine.playShieldActivate();
+      updateShieldHUD();
+      spawnDamageText(playerModel.mesh.position, '🛡️ מגן 3 שניות!', false, '#38bdf8');
+      showBanner('🛡️ בועת מגן פעילה!', 'חסינות מוחלטת מכל נזק ל-3 שניות!');
+    }
+
+    function updateShieldHUD() {
+      const btn = document.getElementById('btn-screen-shield');
+      const badge = document.getElementById('screen-shield-badge');
+      const text = document.getElementById('screen-shield-text');
+      if (!btn) return;
+
+      const count = Game.shieldCount || 0;
+      if (badge) badge.textContent = count;
+
+      if (Game.shieldActive) {
+        btn.classList.add('active');
+        btn.classList.remove('empty');
+        if (text) text.textContent = `${Math.ceil(Game.shieldTimer)}ש`;
+      } else {
+        btn.classList.remove('active');
+        if (text) text.textContent = 'מגן';
+        if (count > 0) {
+          btn.classList.remove('empty');
+        } else {
+          btn.classList.add('empty');
+        }
+      }
+
+      const shieldTag = document.getElementById('shield-inventory-tag');
+      if (shieldTag) {
+        shieldTag.textContent = `במלאי שלך: ${count} 🛡️`;
+      }
+    }
+
     function startGame() {
       SoundEngine.init();
       document.getElementById('start-screen').classList.remove('active');
@@ -3198,6 +3478,27 @@
     document.getElementById('tab-btn-powerups').addEventListener('click', () => switchShopTab('powerups'));
 
     document.getElementById('btn-buy-360').addEventListener('click', buyAbility360);
+
+    const btnBuyShield = document.getElementById('btn-buy-shield');
+    if (btnBuyShield) {
+      btnBuyShield.addEventListener('click', buyShieldPowerup);
+    }
+
+    const btnScreenShield = document.getElementById('btn-screen-shield');
+    if (btnScreenShield) {
+      btnScreenShield.addEventListener('pointerdown', (e) => {
+        e.stopPropagation();
+        e.preventDefault();
+        activateShieldBubble();
+      });
+    }
+
+    // Keyboard shortcut Q or E for quick shield bubble activation on PC
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'q' || e.key === 'Q' || e.key === 'e' || e.key === 'E') {
+        activateShieldBubble();
+      }
+    });
     // Force Refresh & Cache Clear
     const btnForceRefresh = document.getElementById('btn-force-refresh');
     if (btnForceRefresh) {
