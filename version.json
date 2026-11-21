@@ -1,12 +1,10 @@
 {
-  "version": "3.0",
-  "build": 1732194000,
-  "updatedAt": "2026-11-21T10:45:00Z",
+  "version": "3.1",
+  "build": 1732195800,
+  "updatedAt": "2026-11-21T11:00:00Z",
   "features": [
-    "Added Shockwave power-up (גל הדף) for 45 gold coins",
-    "Blasts and knocks back all nearby enemies violently away from the player with custom sound and ring VFX",
-    "Staggers enemies and interrupts their attacks",
-    "Dedicated HUD/screen button with live stock badge and keyboard shortcuts (R / F)",
-    "Shop inventory counter and persistent consumable storage"
+    "Fixed Shockwave (גל הדף) enemy knockback bug by targeting Game.enemies and humanoid model mesh properly",
+    "Fixed visual HUD inventory badge decrement bug so count updates immediately upon use",
+    "Strengthened knockback force to 14.5 units across 16-unit radius with dust particles and stagger"
   ]
 }

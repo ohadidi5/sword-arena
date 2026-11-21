@@ -6,10 +6,10 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <title>זירת החרב - אויבים מיוחדים וקרבות גלים (v3.0)</title>
+  <title>זירת החרב - אויבים מיוחדים וקרבות גלים (v3.1)</title>
   <script>
     // AUTOMATIC AUTO-UPDATE & INSTANT CACHE-BUSTER ENGINE
-    const APP_VERSION = "3.0";
+    const APP_VERSION = "3.1";
     (function checkAutoUpdate() {
       try {
         const params = new URLSearchParams(window.location.search);
@@ -1086,7 +1086,7 @@
       <div class="hud-card wave-badge">
         <div class="wave-title">גל <span id="wave-display" class="wave-number">1</span></div>
         <div id="enemies-remaining" class="wave-remaining">אויבים: 3</div>
-        <div style="font-size: 9px; color: #10b981; font-weight: bold;">גרסה 3.0 ✔️</div>
+        <div style="font-size: 9px; color: #10b981; font-weight: bold;">גרסה 3.1 ✔️</div>
       </div>
     </div>
 
@@ -1153,7 +1153,7 @@
       </div>
 
       <div style="display: flex; justify-content: center; align-items: center; gap: 8px; margin-top: 18px;">
-        <span style="font-size: 12px; color: #10b981; font-weight: bold;">גרסה 3.0 ✔️ (עדכון אוטומטי)</span>
+        <span style="font-size: 12px; color: #10b981; font-weight: bold;">גרסה 3.1 ✔️ (עדכון אוטומטי)</span>
         <button id="btn-force-refresh" style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #94a3b8; border-radius: 8px; font-size: 11px; padding: 3px 8px; cursor: pointer;">🔄 רענן</button>
       </div>
     </div>
@@ -3703,66 +3703,77 @@
         return;
       }
 
-      Game.shockwaveCount--;
+      // 1. Deduct count immediately & persist to storage
+      Game.shockwaveCount = Math.max(0, (Game.shockwaveCount || 0) - 1);
       try {
-        localStorage.setItem('sword_arena_powerup_shockwave', Game.shockwaveCount);
+        localStorage.setItem('sword_arena_powerup_shockwave', Game.shockwaveCount.toString());
       } catch (e) {}
 
+      // 2. Immediately update HUD badge & shop counters so count decreases visually right away!
+      updateShockwaveHUD();
+      updateShopButtons();
+
+      // 3. Audio & visual shockwave ring VFX
       SoundEngine.playShockwave();
       const pPos = playerModel.mesh.position.clone();
       spawnShockwaveVFX(pPos);
 
-      // Push all nearby alive enemies backward away from player!
-      const pushRadius = 14.0;
+      // 4. Push all nearby alive enemies backward away from player!
+      const pushRadius = 16.0;
       let knockedCount = 0;
 
-      for (let i = 0; i < enemies.length; i++) {
-        const enemy = enemies[i];
-        if (!enemy || enemy.isDead) continue;
+      if (Game.enemies && Array.isArray(Game.enemies)) {
+        for (let i = 0; i < Game.enemies.length; i++) {
+          const enemy = Game.enemies[i];
+          if (!enemy || enemy.isDead || !enemy.model || !enemy.model.mesh) continue;
 
-        const ePos = enemy.mesh.position;
-        const dx = ePos.x - pPos.x;
-        const dz = ePos.z - pPos.z;
-        const dist = Math.sqrt(dx * dx + dz * dz);
+          const ePos = enemy.model.mesh.position;
+          const dx = ePos.x - pPos.x;
+          const dz = ePos.z - pPos.z;
+          const dist = Math.sqrt(dx * dx + dz * dz);
 
-        if (dist <= pushRadius) {
-          knockedCount++;
-          // Direction vector away from player
-          let dirX = dx;
-          let dirZ = dz;
-          if (dist < 0.001) {
-            dirX = Math.cos(Math.random() * Math.PI * 2);
-            dirZ = Math.sin(Math.random() * Math.PI * 2);
-          } else {
-            dirX /= dist;
-            dirZ /= dist;
+          if (dist <= pushRadius) {
+            knockedCount++;
+
+            // Direction vector away from player
+            let dirX = dx;
+            let dirZ = dz;
+            if (dist < 0.001) {
+              const randAng = Math.random() * Math.PI * 2;
+              dirX = Math.cos(randAng);
+              dirZ = Math.sin(randAng);
+            } else {
+              dirX /= dist;
+              dirZ /= dist;
+            }
+
+            // High-impact knockback force away from player: 11 to 15 units!
+            const force = 14.5 * (1.0 - (dist / pushRadius) * 0.35);
+            ePos.x += dirX * force;
+            ePos.z += dirZ * force;
+
+            // Clamp inside arena boundary
+            const maxR = CONFIG.ARENA_RADIUS - 1.2;
+            const currentR = Math.sqrt(ePos.x * ePos.x + ePos.z * ePos.z);
+            if (currentR > maxR) {
+              ePos.x = (ePos.x / currentR) * maxR;
+              ePos.z = (ePos.z / currentR) * maxR;
+            }
+
+            // Stagger enemy (interrupt attack & reset cooldown)
+            enemy.attackCooldown = Math.max(enemy.attackCooldown || 0, 1.6);
+            enemy.punchAnimationTime = 0;
+            if (enemy.model.rightArmPivot) {
+              enemy.model.rightArmPivot.rotation.x = 0;
+            }
+
+            // Visual effect & text on knocked enemy
+            spawnDamageText(ePos.clone(), '💨 נהדף!', false, '#fb923c');
+            spawnHitParticles(ePos.clone(), 0xea580c, 12);
           }
-
-          // Force drops slightly with distance, minimum ~7.2 units knockback, maximum ~12.0 units knockback
-          const force = 12.0 * (1.0 - (dist / pushRadius) * 0.4);
-          ePos.x += dirX * force;
-          ePos.z += dirZ * force;
-
-          // Clamp inside arena boundary
-          const maxR = CONFIG.ARENA_RADIUS - 1.2;
-          const currentR = Math.sqrt(ePos.x * ePos.x + ePos.z * ePos.z);
-          if (currentR > maxR) {
-            ePos.x = (ePos.x / currentR) * maxR;
-            ePos.z = (ePos.z / currentR) * maxR;
-          }
-
-          // Stagger enemy (interrupt attack & reset cooldown)
-          enemy.attackCooldown = Math.max(enemy.attackCooldown || 0, 1.3);
-          enemy.punchAnimationTime = 0;
-          if (enemy.rightArm) enemy.rightArm.rotation.x = 0;
-
-          // Visual effect on enemy
-          spawnDamageText(ePos.clone(), '💨 נהדף!', false, '#fb923c');
-          spawnParticles(ePos.clone(), 6, '#ea580c');
         }
       }
 
-      updateShockwaveHUD();
       spawnDamageText(pPos, '💥 גל הדף!', false, '#f97316');
       if (knockedCount > 0) {
         showBanner('💥 גל הדף הופעל!', `${knockedCount} אויבים הועפו אחורה בעוצמה!`);
@@ -3795,6 +3806,8 @@
       SoundEngine.init();
       document.getElementById('start-screen').classList.remove('active');
       Game.isStarted = true;
+      updateShieldHUD();
+      updateShockwaveHUD();
       startWave(1);
     }
 
