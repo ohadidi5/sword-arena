@@ -6,10 +6,10 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <title>זירת החרב - אויבים מיוחדים וקרבות גלים (v2.3)</title>
+  <title>זירת החרב - אויבים מיוחדים וקרבות גלים (v2.4)</title>
   <script>
     // AUTOMATIC AUTO-UPDATE & INSTANT CACHE-BUSTER ENGINE
-    const APP_VERSION = "2.3";
+    const APP_VERSION = "2.4";
     (function checkAutoUpdate() {
       try {
         const params = new URLSearchParams(window.location.search);
@@ -81,6 +81,7 @@
       align-items: center;
       gap: 10px;
       width: 100%;
+      padding-right: 86px;
     }
     .hud-card {
       background: rgba(15, 23, 42, 0.78);
@@ -837,6 +838,13 @@
   <div id="damage-flash"></div>
   <div id="slowmo-vignette"></div>
 
+  <!-- תמיד בצד ימין למעלה בקטן: גל שיא שלך -->
+  <div id="persistent-best-wave-corner" style="position: fixed; top: 7px; right: 10px; z-index: 1000; background: rgba(15, 23, 42, 0.9); border: 1px solid rgba(251, 191, 36, 0.5); backdrop-filter: blur(8px); padding: 3px 8px; border-radius: 8px; display: flex; align-items: center; gap: 4px; pointer-events: none; box-shadow: 0 2px 8px rgba(0,0,0,0.5);">
+    <span style="font-size: 11px;">🏆</span>
+    <span style="font-size: 10px; color: #cbd5e1;">שיא:</span>
+    <strong class="best-wave-num" style="font-size: 12px; color: #fbbf24;">1</strong>
+  </div>
+
   <!-- UI HUD -->
   <div id="ui-layer">
     <div class="top-bar">
@@ -863,7 +871,7 @@
       <div class="hud-card wave-badge">
         <div class="wave-title">גל <span id="wave-display" class="wave-number">1</span></div>
         <div id="enemies-remaining" class="wave-remaining">אויבים: 3</div>
-        <div style="font-size: 9px; color: #10b981; font-weight: bold;">גרסה 2.3 ✔️</div>
+        <div style="font-size: 9px; color: #10b981; font-weight: bold;">גרסה 2.4 ✔️</div>
       </div>
     </div>
 
@@ -906,13 +914,17 @@
         <strong id="start-gold-count">🪙 0</strong>
       </div>
 
+      <div style="font-size: 13px; color: #fbbf24; font-weight: bold; margin-bottom: 14px;">
+        🏆 שיא נוכחי: גל <span class="best-wave-num">1</span>
+      </div>
+
       <div class="screen-actions">
         <button id="btn-start-game" class="btn-action-primary">⚔️ התחל משחק</button>
         <button id="btn-start-shop" class="btn-action-shop">🛒 כניסה לחנות</button>
       </div>
 
       <div style="display: flex; justify-content: center; align-items: center; gap: 8px; margin-top: 18px;">
-        <span style="font-size: 12px; color: #10b981; font-weight: bold;">גרסה 2.3 ✔️ (עדכון אוטומטי)</span>
+        <span style="font-size: 12px; color: #10b981; font-weight: bold;">גרסה 2.4 ✔️ (עדכון אוטומטי)</span>
         <button id="btn-force-refresh" style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #94a3b8; border-radius: 8px; font-size: 11px; padding: 3px 8px; cursor: pointer;">🔄 רענן</button>
       </div>
     </div>
@@ -923,6 +935,7 @@
     <h1 class="game-over-title">נפסלת!</h1>
     <div class="game-over-stats">
       <div>הגעת לגל: <span id="final-wave">1</span></div>
+      <div>גל שיא שלך: <span class="best-wave-num" style="color: #fbbf24; font-weight: bold;">1</span> 🏆</div>
       <div>אויבים שחוסלו: <span id="final-kills">0</span></div>
       <div>זהב שהרווחת בסיבוב: <span id="final-round-gold" style="color: #fbbf24;">+0 🪙</span></div>
       <div style="margin-top: 8px; padding-top: 8px; border-top: 1px solid rgba(255,255,255,0.1);">סך כל הזהב שברשותך: <span id="final-total-gold" style="color: #fbbf24; font-size: 20px;">🪙 0</span></div>
@@ -2001,9 +2014,44 @@
       Game.enemies.push(enemy);
     }
 
+    /* =========================================================
+       PERSISTENT BEST WAVE (HIGH SCORE) ENGINE
+       ========================================================= */
+    const STORAGE_KEY_BEST_WAVE = 'sword_arena_best_wave';
+
+    function getBestWave() {
+      try {
+        const val = parseInt(localStorage.getItem(STORAGE_KEY_BEST_WAVE), 10);
+        return isNaN(val) || val < 1 ? 1 : val;
+      } catch (e) {
+        return 1;
+      }
+    }
+
+    function recordWave(waveNum) {
+      const current = getBestWave();
+      if (waveNum > current) {
+        try {
+          localStorage.setItem(STORAGE_KEY_BEST_WAVE, waveNum.toString());
+        } catch (e) {}
+      }
+      updateBestWaveDisplays();
+    }
+
+    function updateBestWaveDisplays() {
+      const best = getBestWave();
+      document.querySelectorAll('.best-wave-num').forEach(el => {
+        el.textContent = best;
+      });
+    }
+
+    // Initial update on page load
+    updateBestWaveDisplays();
+
     function startWave(waveNum) {
       Game.wave = waveNum;
       document.getElementById('wave-display').textContent = waveNum;
+      recordWave(waveNum);
 
       // Clean existing beams
       cleanAllHealBeams();
@@ -2232,6 +2280,7 @@
       playerModel.mesh.rotation.x = Math.PI / 2.2;
       playerModel.mesh.position.y = 0.3;
 
+      recordWave(Game.wave);
       document.getElementById('final-wave').textContent = Game.wave;
       document.getElementById('final-kills').textContent = Game.totalKills;
       document.getElementById('final-round-gold').textContent = `+${Game.sessionCoins} 🪙`;
@@ -2662,10 +2711,10 @@
         const targetRot = Math.atan2(dx, dz);
 
         // Rotation:
-        // Shield enemies rotate 60% slower (0.44 rad/s) - slow heavy armored turns!
+        // Shield enemies rotate 15% faster than v2.3 (0.51 rad/s)
         if (enemy.type === 'shield') {
           const diff = Math.atan2(Math.sin(targetRot - mesh.rotation.y), Math.cos(targetRot - mesh.rotation.y));
-          mesh.rotation.y += diff * Math.min(1.0, dt * 0.44);
+          mesh.rotation.y += diff * Math.min(1.0, dt * 0.51);
         } else {
           mesh.rotation.y = targetRot;
         }

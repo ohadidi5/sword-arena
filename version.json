@@ -1,12 +1,12 @@
 {
-  "version": "2.3",
-  "build": 1732171900,
-  "updatedAt": "2026-11-21T06:31:00Z",
+  "version": "2.4",
+  "build": 1732172500,
+  "updatedAt": "2026-11-21T06:41:00Z",
   "features": [
-    "Shield Guard rotates 60% slower (0.44 rad/s) for very smooth flanking and backstabbing",
-    "Shield mesh angled directly forward (not sideways)",
-    "Gradual wave progression: only 1 shield guard in wave 2, gentle scaling across waves",
-    "Shield Guard cannot attack player from behind",
+    "Shield Guard rotation speed tuned 15% faster (0.51 rad/s) for balanced agility",
+    "Persistent High Score Wave (גל שיא) always displayed at the top right",
+    "Shield mesh angled directly forward",
+    "Paced wave roster (only 1 shield guard in wave 2)",
     "Special enemies: Shield Guard, Assassin, Healer with green beam"
   ]
 }
