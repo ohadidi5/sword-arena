@@ -1,13 +1,11 @@
 {
-  "version": "2.5",
-  "build": 1732173800,
-  "updatedAt": "2026-11-21T07:03:00Z",
+  "version": "2.6",
+  "build": 1732174000,
+  "updatedAt": "2026-11-21T07:08:00Z",
   "features": [
-    "Fixed shop tab separation: 360 degree sword strike is strictly in Special Abilities category",
-    "Switching to Powerups tab strictly hides Special Abilities",
-    "Persistent High Score Wave (גל שיא) always displayed at the top right",
-    "Shield Guard rotation speed tuned for responsive backstabs (0.51 rad/s)",
-    "Shield mesh angled directly forward",
-    "Gradual wave progression (only 1 shield guard in wave 2)"
+    "Removed all powerups from shop as requested (new powerups added only on demand)",
+    "Pure player base stats restored",
+    "Special Abilities category with 360 degree sword strike preserved",
+    "Persistent High Score Wave (גל שיא) always displayed at the top right"
   ]
 }

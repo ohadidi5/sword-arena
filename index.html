@@ -6,10 +6,10 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <title>זירת החרב - אויבים מיוחדים וקרבות גלים (v2.5)</title>
+  <title>זירת החרב - אויבים מיוחדים וקרבות גלים (v2.6)</title>
   <script>
     // AUTOMATIC AUTO-UPDATE & INSTANT CACHE-BUSTER ENGINE
-    const APP_VERSION = "2.5";
+    const APP_VERSION = "2.6";
     (function checkAutoUpdate() {
       try {
         const params = new URLSearchParams(window.location.search);
@@ -871,7 +871,7 @@
       <div class="hud-card wave-badge">
         <div class="wave-title">גל <span id="wave-display" class="wave-number">1</span></div>
         <div id="enemies-remaining" class="wave-remaining">אויבים: 3</div>
-        <div style="font-size: 9px; color: #10b981; font-weight: bold;">גרסה 2.5 ✔️</div>
+        <div style="font-size: 9px; color: #10b981; font-weight: bold;">גרסה 2.6 ✔️</div>
       </div>
     </div>
 
@@ -924,7 +924,7 @@
       </div>
 
       <div style="display: flex; justify-content: center; align-items: center; gap: 8px; margin-top: 18px;">
-        <span style="font-size: 12px; color: #10b981; font-weight: bold;">גרסה 2.5 ✔️ (עדכון אוטומטי)</span>
+        <span style="font-size: 12px; color: #10b981; font-weight: bold;">גרסה 2.6 ✔️ (עדכון אוטומטי)</span>
         <button id="btn-force-refresh" style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #94a3b8; border-radius: 8px; font-size: 11px; padding: 3px 8px; cursor: pointer;">🔄 רענן</button>
       </div>
     </div>
@@ -980,44 +980,10 @@
 
         <!-- Tab 2: Power-ups (פאוור-אפים) -->
         <div id="tab-pane-powerups" class="shop-tab-pane">
-          <!-- Powerup 1: Max HP -->
-          <div class="shop-item-card">
-            <div class="item-icon-box">❤️</div>
-            <div class="item-details">
-              <div class="item-title">תוספת חיים (+25 HP מקסימלי)</div>
-              <div class="item-desc">מגדיל את כמות החיים המרבית של הלוחם לצמיתות.</div>
-            </div>
-            <button id="btn-buy-hp" class="btn-buy">50 🪙</button>
-          </div>
-
-          <!-- Powerup 2: Damage -->
-          <div class="shop-item-card">
-            <div class="item-icon-box">🗡️</div>
-            <div class="item-details">
-              <div class="item-title">נזק חרב משודרג (+5 נזק)</div>
-              <div class="item-desc">כל מכת חרב מורידה יותר נקודות חיים לאויבים.</div>
-            </div>
-            <button id="btn-buy-dmg" class="btn-buy">70 🪙</button>
-          </div>
-
-          <!-- Powerup 3: Speed -->
-          <div class="shop-item-card">
-            <div class="item-icon-box">👟</div>
-            <div class="item-details">
-              <div class="item-title">מהירות תנועה (+15%)</div>
-              <div class="item-desc">תנועה מהירה יותר בזירה להתחמקות נוחה מאויבים.</div>
-            </div>
-            <button id="btn-buy-speed" class="btn-buy">60 🪙</button>
-          </div>
-
-          <!-- Powerup 4: Full Heal -->
-          <div class="shop-item-card">
-            <div class="item-icon-box">🧪</div>
-            <div class="item-details">
-              <div class="item-title">שיקוי ריפוי מלא (100% חיים)</div>
-              <div class="item-desc">מרפא את כל החיים של הלוחם באופן מיידי במהלך המשחק.</div>
-            </div>
-            <button id="btn-buy-heal" class="btn-buy">25 🪙</button>
+          <div style="text-align: center; padding: 40px 20px; color: #94a3b8;">
+            <div style="font-size: 40px; margin-bottom: 12px;">⚡</div>
+            <div style="font-size: 16px; font-weight: bold; color: #cbd5e1; margin-bottom: 8px;">קטגוריית פאוור-אפים</div>
+            <div style="font-size: 13px; color: #64748b; line-height: 1.5;">הקטגוריה ריקה כרגע.<br>פאוור-אפים חדשים יתווספו לכאן רק לפי בקשתך!</div>
           </div>
         </div>
       </div>
@@ -3042,45 +3008,6 @@
         }
       }
 
-      // HP Powerup Button (50 coins)
-      const btnHp = document.getElementById('btn-buy-hp');
-      if (btnHp) {
-        if (Game.coins < 50) {
-          btnHp.className = 'btn-buy cant-afford';
-        } else {
-          btnHp.className = 'btn-buy';
-        }
-      }
-
-      // DMG Powerup Button (70 coins)
-      const btnDmg = document.getElementById('btn-buy-dmg');
-      if (btnDmg) {
-        if (Game.coins < 70) {
-          btnDmg.className = 'btn-buy cant-afford';
-        } else {
-          btnDmg.className = 'btn-buy';
-        }
-      }
-
-      // Speed Powerup Button (60 coins)
-      const btnSpeed = document.getElementById('btn-buy-speed');
-      if (btnSpeed) {
-        if (Game.coins < 60) {
-          btnSpeed.className = 'btn-buy cant-afford';
-        } else {
-          btnSpeed.className = 'btn-buy';
-        }
-      }
-
-      // Heal Powerup Button (25 coins)
-      const btnHeal = document.getElementById('btn-buy-heal');
-      if (btnHeal) {
-        if (Game.coins < 25 || Game.playerHp >= CONFIG.PLAYER_MAX_HP) {
-          btnHeal.className = 'btn-buy cant-afford';
-        } else {
-          btnHeal.className = 'btn-buy';
-        }
-      }
     }
 
     function loadSavedData() {
@@ -3095,23 +3022,15 @@
           Game.abilities.whirlwind360 = true;
         }
 
-        const savedHp = localStorage.getItem('sword_arena_bonus_hp');
-        if (savedHp !== null) {
-          Game.powerups.hpBonus = parseInt(savedHp, 10) || 0;
-          CONFIG.PLAYER_MAX_HP = 100 + Game.powerups.hpBonus;
-          Game.playerHp = CONFIG.PLAYER_MAX_HP;
-        }
-
-        const savedDmg = localStorage.getItem('sword_arena_bonus_dmg');
-        if (savedDmg !== null) {
-          Game.powerups.dmgBonus = parseInt(savedDmg, 10) || 0;
-          CONFIG.PLAYER_DAMAGE = 10 + Game.powerups.dmgBonus;
-        }
-
-        const savedSpeed = localStorage.getItem('sword_arena_bonus_speed');
-        if (savedSpeed !== null) {
-          Game.powerups.speedBonus = parseFloat(savedSpeed) || 0;
-        }
+        // Reset powerups - active only when explicitly requested
+        CONFIG.PLAYER_MAX_HP = 100;
+        CONFIG.PLAYER_DAMAGE = 10;
+        Game.powerups = { hpBonus: 0, dmgBonus: 0, speedBonus: 0 };
+        try {
+          localStorage.removeItem('sword_arena_bonus_hp');
+          localStorage.removeItem('sword_arena_bonus_dmg');
+          localStorage.removeItem('sword_arena_bonus_speed');
+        } catch (e) {}
       } catch (e) {
         console.warn('Storage unavailable', e);
       }
@@ -3175,63 +3094,6 @@
       showBanner('יכולת 360° נרכשה! 🌪️', 'מכת החרב פוגעת כעת בכל הכיוונים מסביבך!');
     }
 
-    function buyPowerup(type, cost) {
-      SoundEngine.init();
-      if (Game.coins < cost) {
-        SoundEngine.playError();
-        showBanner('אין מספיק מטבעות!', `דרוש ${cost} מטבעות זהב`);
-        return;
-      }
-
-      if (type === 'heal' && Game.playerHp >= CONFIG.PLAYER_MAX_HP) {
-        SoundEngine.playError();
-        showBanner('החיים שלך מלאים!', 'לא ניתן לרפא כרגע');
-        return;
-      }
-
-      Game.coins -= cost;
-
-      if (type === 'hp') {
-        Game.powerups.hpBonus = (Game.powerups.hpBonus || 0) + 25;
-        CONFIG.PLAYER_MAX_HP = 100 + Game.powerups.hpBonus;
-        Game.playerHp += 25;
-        try {
-          localStorage.setItem('sword_arena_bonus_hp', Game.powerups.hpBonus);
-        } catch (e) {}
-        showBanner('+25 חיים מקסימליים! ❤️', `חיים מירביים חדשים: ${CONFIG.PLAYER_MAX_HP}`);
-      } else if (type === 'dmg') {
-        Game.powerups.dmgBonus = (Game.powerups.dmgBonus || 0) + 5;
-        CONFIG.PLAYER_DAMAGE = 10 + Game.powerups.dmgBonus;
-        try {
-          localStorage.setItem('sword_arena_bonus_dmg', Game.powerups.dmgBonus);
-        } catch (e) {}
-        showBanner('+5 נזק חרב! 🗡️', `נזק חרב חדש: ${CONFIG.PLAYER_DAMAGE}`);
-      } else if (type === 'speed') {
-        Game.powerups.speedBonus = (Game.powerups.speedBonus || 0) + 0.15;
-        try {
-          localStorage.setItem('sword_arena_bonus_speed', Game.powerups.speedBonus);
-        } catch (e) {}
-        showBanner('+15% מהירות ריצה! 👟', 'הלוחם זז מהר יותר בזירה!');
-      } else if (type === 'heal') {
-        Game.playerHp = CONFIG.PLAYER_MAX_HP;
-        showBanner('ריפוי מלא! 🧪', 'מד החיים התמלא ב-100%!');
-      }
-
-      // Update HP bar UI
-      const pct = (Game.playerHp / CONFIG.PLAYER_MAX_HP) * 100;
-      const hpFill = document.getElementById('player-hp-fill');
-      const hpText = document.getElementById('player-hp-text');
-      if (hpFill) hpFill.style.width = `${pct}%`;
-      if (hpText) hpText.textContent = `${Game.playerHp} / ${CONFIG.PLAYER_MAX_HP} HP`;
-
-      try {
-        localStorage.setItem('sword_arena_coins', Game.coins);
-      } catch (e) {}
-
-      SoundEngine.playBuy();
-      updateCoinsUI();
-    }
-
     function startGame() {
       SoundEngine.init();
       document.getElementById('start-screen').classList.remove('active');
@@ -3250,9 +3112,6 @@
     document.getElementById('tab-btn-powerups').addEventListener('click', () => switchShopTab('powerups'));
 
     document.getElementById('btn-buy-360').addEventListener('click', buyAbility360);
-    document.getElementById('btn-buy-hp').addEventListener('click', () => buyPowerup('hp', 50));
-    document.getElementById('btn-buy-dmg').addEventListener('click', () => buyPowerup('dmg', 70));
-    document.getElementById('btn-buy-speed').addEventListener('click', () => buyPowerup('speed', 60));
     // Force Refresh & Cache Clear
     const btnForceRefresh = document.getElementById('btn-force-refresh');
     if (btnForceRefresh) {
