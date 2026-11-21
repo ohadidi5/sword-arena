@@ -6,10 +6,10 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <title>זירת החרב - אויבים מיוחדים וקרבות גלים (v2.1)</title>
+  <title>זירת החרב - אויבים מיוחדים וקרבות גלים (v2.2)</title>
   <script>
     // AUTOMATIC AUTO-UPDATE & INSTANT CACHE-BUSTER ENGINE
-    const APP_VERSION = "2.1";
+    const APP_VERSION = "2.2";
     (function checkAutoUpdate() {
       try {
         const params = new URLSearchParams(window.location.search);
@@ -863,7 +863,7 @@
       <div class="hud-card wave-badge">
         <div class="wave-title">גל <span id="wave-display" class="wave-number">1</span></div>
         <div id="enemies-remaining" class="wave-remaining">אויבים: 3</div>
-        <div style="font-size: 9px; color: #10b981; font-weight: bold;">גרסה 2.1 ✔️</div>
+        <div style="font-size: 9px; color: #10b981; font-weight: bold;">גרסה 2.2 ✔️</div>
       </div>
     </div>
 
@@ -912,7 +912,7 @@
       </div>
 
       <div style="display: flex; justify-content: center; align-items: center; gap: 8px; margin-top: 18px;">
-        <span style="font-size: 12px; color: #10b981; font-weight: bold;">גרסה 2.1 ✔️ (עדכון אוטומטי)</span>
+        <span style="font-size: 12px; color: #10b981; font-weight: bold;">גרסה 2.2 ✔️ (עדכון אוטומטי)</span>
         <button id="btn-force-refresh" style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #94a3b8; border-radius: 8px; font-size: 11px; padding: 3px 8px; cursor: pointer;">🔄 רענן</button>
       </div>
     </div>
@@ -2639,10 +2639,10 @@
         const targetRot = Math.atan2(dx, dz);
 
         // Rotation:
-        // Shield enemies rotate 35% slower (1.82 rad/s) so player can maneuver around to their back!
+        // Shield enemies rotate 40% slower (1.09 rad/s) so player can maneuver around to their back!
         if (enemy.type === 'shield') {
           const diff = Math.atan2(Math.sin(targetRot - mesh.rotation.y), Math.cos(targetRot - mesh.rotation.y));
-          mesh.rotation.y += diff * Math.min(1.0, dt * 1.82);
+          mesh.rotation.y += diff * Math.min(1.0, dt * 1.09);
         } else {
           mesh.rotation.y = targetRot;
         }

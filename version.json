@@ -1,11 +1,11 @@
 {
-  "version": "2.1",
-  "build": 1732171200,
-  "updatedAt": "2026-11-21T06:20:00Z",
+  "version": "2.2",
+  "build": 1732171500,
+  "updatedAt": "2026-11-21T06:25:00Z",
   "features": [
-    "Shield Guard rotates 35% slower for smoother tactical backstabs",
-    "Shield Guard cannot punch or hit player when player is behind him",
-    "Special enemies: Shield Guard, Assassin, Healer with green beam",
+    "Shield Guard rotates 40% slower (1.09 rad/s) for very responsive backstabs",
+    "Shield Guard cannot attack player from behind",
+    "Special enemies: Shield Guard, Assassin, Healer with green light beam",
     "Wave HP scaling and overhead tags"
   ]
 }
