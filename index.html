@@ -6,10 +6,10 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <title>זירת החרב - אויבים מיוחדים וקרבות גלים (v2.2)</title>
+  <title>זירת החרב - אויבים מיוחדים וקרבות גלים (v2.3)</title>
   <script>
     // AUTOMATIC AUTO-UPDATE & INSTANT CACHE-BUSTER ENGINE
-    const APP_VERSION = "2.2";
+    const APP_VERSION = "2.3";
     (function checkAutoUpdate() {
       try {
         const params = new URLSearchParams(window.location.search);
@@ -863,7 +863,7 @@
       <div class="hud-card wave-badge">
         <div class="wave-title">גל <span id="wave-display" class="wave-number">1</span></div>
         <div id="enemies-remaining" class="wave-remaining">אויבים: 3</div>
-        <div style="font-size: 9px; color: #10b981; font-weight: bold;">גרסה 2.2 ✔️</div>
+        <div style="font-size: 9px; color: #10b981; font-weight: bold;">גרסה 2.3 ✔️</div>
       </div>
     </div>
 
@@ -912,7 +912,7 @@
       </div>
 
       <div style="display: flex; justify-content: center; align-items: center; gap: 8px; margin-top: 18px;">
-        <span style="font-size: 12px; color: #10b981; font-weight: bold;">גרסה 2.2 ✔️ (עדכון אוטומטי)</span>
+        <span style="font-size: 12px; color: #10b981; font-weight: bold;">גרסה 2.3 ✔️ (עדכון אוטומטי)</span>
         <button id="btn-force-refresh" style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #94a3b8; border-radius: 8px; font-size: 11px; padding: 3px 8px; cursor: pointer;">🔄 רענן</button>
       </div>
     </div>
@@ -1613,10 +1613,10 @@
       } else {
         // SPECIAL 3D ATTACHMENTS FOR ENEMIES:
         if (enemyType === 'shield') {
-          // 3D KITE SHIELD FOR SHIELD ENEMY
+          // 3D KITE SHIELD FOR SHIELD ENEMY (facing directly forward)
           const shieldGroup = new THREE.Group();
-          shieldGroup.position.set(0.12, -0.15, 0.35);
-          shieldGroup.rotation.y = -Math.PI / 2;
+          shieldGroup.position.set(-0.16, -0.12, 0.42);
+          shieldGroup.rotation.set(0, 0, 0); // Faces directly FORWARD!
 
           // Main Shield Plate
           const plateGeo = new THREE.BoxGeometry(0.72, 1.05, 0.09);
@@ -1917,32 +1917,54 @@
       });
     }
 
-    function spawnEnemy(forcedType = null) {
-      let type = 'warrior';
-      if (forcedType) {
-        type = forcedType;
+    function getWaveRoster(waveNum) {
+      if (waveNum === 1) {
+        // Wave 1: 3 basic warriors (gentle warm-up)
+        return ['warrior', 'warrior', 'warrior'];
+      } else if (waveNum === 2) {
+        // Wave 2: 4 enemies, EXACTLY ONE Shield Guard!
+        return ['warrior', 'warrior', 'warrior', 'shield'];
+      } else if (waveNum === 3) {
+        // Wave 3: 5 enemies, 1 Shield Guard, 1 Healer, 3 Warriors
+        return ['warrior', 'warrior', 'shield', 'healer', 'warrior'];
+      } else if (waveNum === 4) {
+        // Wave 4: 6 enemies, 1 Shield Guard, 1 Healer, 1 Assassin, 3 Warriors
+        return ['warrior', 'shield', 'assassin', 'warrior', 'healer', 'warrior'];
+      } else if (waveNum === 5) {
+        // Wave 5: 7 enemies, 2 Shield Guards, 1 Healer, 1 Assassin, 3 Warriors
+        return ['warrior', 'shield', 'assassin', 'shield', 'healer', 'warrior', 'warrior'];
       } else {
-        const wave = Game.wave;
-        const rand = Math.random();
-        if (wave === 1) {
-          // Wave 1: Pure warriors
-          type = 'warrior';
-        } else if (wave === 2) {
-          // Wave 2: Introduce Shield Guards (40% chance)
-          type = rand < 0.40 ? 'shield' : 'warrior';
-        } else if (wave === 3) {
-          // Wave 3: Introduce Healers (30% shield, 35% healer, 35% warrior)
-          if (rand < 0.30) type = 'shield';
-          else if (rand < 0.65) type = 'healer';
-          else type = 'warrior';
-        } else {
-          // Wave 4+: Full mix including Assassins, Shield Guards, Healers, and Warriors
-          if (rand < 0.28) type = 'shield';
-          else if (rand < 0.52) type = 'assassin';
-          else if (rand < 0.72) type = 'healer';
-          else type = 'warrior';
+        // Wave 6+: Scales gently: total enemies = 5 + waveNum (max 15)
+        const count = Math.min(15, 5 + waveNum);
+        const roster = [];
+        let shields = 0;
+        let healers = 0;
+        let assassins = 0;
+        const maxShields = Math.min(3, 1 + Math.floor((waveNum - 2) / 3));
+        const maxHealers = Math.min(2, 1 + Math.floor((waveNum - 3) / 4));
+        const maxAssassins = Math.min(3, 1 + Math.floor((waveNum - 4) / 3));
+
+        for (let i = 0; i < count; i++) {
+          const rand = Math.random();
+          if (shields < maxShields && rand < 0.25) {
+            roster.push('shield');
+            shields++;
+          } else if (assassins < maxAssassins && rand < 0.50) {
+            roster.push('assassin');
+            assassins++;
+          } else if (healers < maxHealers && rand < 0.70) {
+            roster.push('healer');
+            healers++;
+          } else {
+            roster.push('warrior');
+          }
         }
+        return roster;
       }
+    }
+
+    function spawnEnemy(forcedType = null) {
+      let type = forcedType || 'warrior';
 
       const cfg = ENEMY_TYPES[type] || ENEMY_TYPES.warrior;
       // "שלאט לאט איך שגדלים הגלים אז גם לאדומים יש יותר חיים"
@@ -1986,15 +2008,16 @@
       // Clean existing beams
       cleanAllHealBeams();
 
-      // Wave calculation: wave 1 = 3 enemies, wave 2 = 5, wave 3 = 8, etc.
-      const enemiesToSpawn = 2 + waveNum * 2;
+      // Gradual, balanced enemy composition
+      const roster = getWaveRoster(waveNum);
+      const enemiesToSpawn = roster.length;
       for (let i = 0; i < enemiesToSpawn; i++) {
         setTimeout(() => {
           if (!Game.isGameOver) {
-            spawnEnemy();
+            spawnEnemy(roster[i]);
             updateEnemyCountUI();
           }
-        }, i * 320); // slight staggered spawn
+        }, i * 350); // slight staggered spawn
       }
 
       updateEnemyCountUI();
@@ -2005,11 +2028,11 @@
       if (waveNum === 1) {
         bannerSub = `לוחמים תוקפים! (החיים עולים בכל גל)`;
       } else if (waveNum === 2) {
-        bannerSub = `🛡️ שומרי מגן הגיעו! (הכה אותם רק מאחור!)`;
+        bannerSub = `🛡️ שומר מגן ראשון הגיע! (הכה אותו רק מאחור!)`;
       } else if (waveNum === 3) {
-        bannerSub = `💚 מרפאים יורים קרן אור ירוקה ומרפאים!`;
+        bannerSub = `💚 מרפא הגיע לשדה הקרב! חסל אותו תחילה!`;
       } else if (waveNum === 4) {
-        bannerSub = `⚡ מתנקשים משתגרים! היזהר מהתקפות פתע!`;
+        bannerSub = `⚡ מתנקש משתגר בזירה! היזהר מהפתעות מאחוריך!`;
       } else {
         bannerSub = `הקרב מתעצם! כל האויבים המיוחדים בזירה!`;
       }
@@ -2639,10 +2662,10 @@
         const targetRot = Math.atan2(dx, dz);
 
         // Rotation:
-        // Shield enemies rotate 40% slower (1.09 rad/s) so player can maneuver around to their back!
+        // Shield enemies rotate 60% slower (0.44 rad/s) - slow heavy armored turns!
         if (enemy.type === 'shield') {
           const diff = Math.atan2(Math.sin(targetRot - mesh.rotation.y), Math.cos(targetRot - mesh.rotation.y));
-          mesh.rotation.y += diff * Math.min(1.0, dt * 1.09);
+          mesh.rotation.y += diff * Math.min(1.0, dt * 0.44);
         } else {
           mesh.rotation.y = targetRot;
         }
