@@ -1,11 +1,12 @@
 {
-  "version": "1.8",
-  "build": 1732123500,
-  "updatedAt": "2026-11-20T17:25:00Z",
+  "version": "2.0",
+  "build": 1732170850,
+  "updatedAt": "2026-11-21T06:14:00Z",
   "features": [
-    "Landscape game-over screen fit",
-    "HUD ultra-compact mode (higher up and 60% smaller)",
-    "Lower joystick position",
-    "Removed joystick text captions"
+    "HP scaling per wave for all enemies",
+    "Special enemy: Shield Guard (blue, front damage immunity, backstab only)",
+    "Special enemy: Assassin (purple, teleports behind player)",
+    "Special enemy: Healer (green, channels green light beam, heals 2 allies 5% HP/s)",
+    "Custom unique 3D models, colors and floating Hebrew name tags for each enemy type"
   ]
 }

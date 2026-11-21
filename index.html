@@ -6,10 +6,10 @@
   <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
   <meta http-equiv="Pragma" content="no-cache">
   <meta http-equiv="Expires" content="0">
-  <title>זירת החרב - קרב גלים וחנות (v1.8)</title>
+  <title>זירת החרב - אויבים מיוחדים וקרבות גלים (v2.0)</title>
   <script>
     // AUTOMATIC AUTO-UPDATE & INSTANT CACHE-BUSTER ENGINE
-    const APP_VERSION = "1.8";
+    const APP_VERSION = "2.0";
     (function checkAutoUpdate() {
       try {
         const params = new URLSearchParams(window.location.search);
@@ -863,7 +863,7 @@
       <div class="hud-card wave-badge">
         <div class="wave-title">גל <span id="wave-display" class="wave-number">1</span></div>
         <div id="enemies-remaining" class="wave-remaining">אויבים: 3</div>
-        <div style="font-size: 9px; color: #10b981; font-weight: bold;">גרסה 1.8 ✔️</div>
+        <div style="font-size: 9px; color: #10b981; font-weight: bold;">גרסה 2.0 ✔️</div>
       </div>
     </div>
 
@@ -912,7 +912,7 @@
       </div>
 
       <div style="display: flex; justify-content: center; align-items: center; gap: 8px; margin-top: 18px;">
-        <span style="font-size: 12px; color: #10b981; font-weight: bold;">גרסה 1.8 ✔️ (עדכון אוטומטי)</span>
+        <span style="font-size: 12px; color: #10b981; font-weight: bold;">גרסה 2.0 ✔️ (עדכון אוטומטי)</span>
         <button id="btn-force-refresh" style="background: rgba(255,255,255,0.08); border: 1px solid rgba(255,255,255,0.15); color: #94a3b8; border-radius: 8px; font-size: 11px; padding: 3px 8px; cursor: pointer;">🔄 רענן</button>
       </div>
     </div>
@@ -1224,6 +1224,55 @@
         gain.connect(this.ctx.destination);
         osc.start(now);
         osc.stop(now + 0.25);
+      },
+      playShieldBlock() {
+        if (!this.ctx) return;
+        const now = this.ctx.currentTime;
+        // Metallic sharp clang
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(750, now);
+        osc.frequency.exponentialRampToValueAtTime(160, now + 0.18);
+        gain.gain.setValueAtTime(0.65, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.18);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.18);
+      },
+      playTeleport() {
+        if (!this.ctx) return;
+        const now = this.ctx.currentTime;
+        // Mysterious ascending whoosh
+        const osc = this.ctx.createOscillator();
+        const gain = this.ctx.createGain();
+        osc.type = 'sine';
+        osc.frequency.setValueAtTime(160, now);
+        osc.frequency.exponentialRampToValueAtTime(950, now + 0.24);
+        gain.gain.setValueAtTime(0.45, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.24);
+        osc.connect(gain);
+        gain.connect(this.ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.24);
+      },
+      playHeal() {
+        if (!this.ctx) return;
+        const now = this.ctx.currentTime;
+        // Soothing celestial chimes
+        [587.33, 739.99, 880, 1174.66].forEach((freq, idx) => {
+          const osc = this.ctx.createOscillator();
+          const gain = this.ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(freq, now + idx * 0.04);
+          gain.gain.setValueAtTime(0.18, now + idx * 0.04);
+          gain.gain.exponentialRampToValueAtTime(0.01, now + idx * 0.04 + 0.28);
+          osc.connect(gain);
+          gain.connect(this.ctx.destination);
+          osc.start(now + idx * 0.04);
+          osc.stop(now + idx * 0.04 + 0.28);
+        });
       }
     };
 
@@ -1393,19 +1442,69 @@
        (Enemies: Red faceless humanoids without weapons)
        ========================================================= */
 
-    function createFacelessHumanoid(isEnemy = false) {
+    /* =========================================================
+       ENEMY TYPES DEFINITION & CONFIGURATION
+       ========================================================= */
+    const ENEMY_TYPES = {
+      warrior: {
+        type: 'warrior',
+        name: 'לוחם',
+        badge: '⚔️ לוחם',
+        color: 0xef4444,     // Crimson Red
+        emissive: 0x991b1b,
+        textColor: '#ef4444',
+        baseHp: 30,
+        hpGrowth: 6,
+        baseSpeed: 3.8
+      },
+      shield: {
+        type: 'shield',
+        name: 'שומר מגן',
+        badge: '🛡️ שומר מגן',
+        color: 0x2563eb,     // Royal Cobalt Blue (NOT red!)
+        emissive: 0x1d4ed8,
+        textColor: '#38bdf8',
+        baseHp: 45,
+        hpGrowth: 8,
+        baseSpeed: 3.2
+      },
+      assassin: {
+        type: 'assassin',
+        name: 'מתנקש',
+        badge: '⚡ מתנקש',
+        color: 0x9333ea,     // Shadow Violet Purple (NOT red!)
+        emissive: 0x6b21a8,
+        textColor: '#c084fc',
+        baseHp: 25,
+        hpGrowth: 5,
+        baseSpeed: 4.8
+      },
+      healer: {
+        type: 'healer',
+        name: 'מרפא',
+        badge: '💚 מרפא',
+        color: 0x10b981,     // Radiant Emerald Green (NOT red!)
+        emissive: 0x059669,
+        textColor: '#34d399',
+        baseHp: 35,
+        hpGrowth: 6,
+        baseSpeed: 3.5
+      }
+    };
+
+    function createFacelessHumanoid(isEnemy = false, enemyType = 'warrior', initialHp = 30) {
       const group = new THREE.Group();
 
-      // Materials
-      const bodyColor = isEnemy ? 0xef4444 : 0xf1f5f9;
-      const emissiveColor = isEnemy ? 0x991b1b : 0x0f172a;
+      const cfg = isEnemy ? (ENEMY_TYPES[enemyType] || ENEMY_TYPES.warrior) : null;
+      const bodyColor = isEnemy ? cfg.color : 0xf1f5f9;
+      const emissiveColor = isEnemy ? cfg.emissive : 0x0f172a;
 
       const bodyMat = new THREE.MeshStandardMaterial({
         color: bodyColor,
         roughness: isEnemy ? 0.3 : 0.25,
         metalness: isEnemy ? 0.5 : 0.8,
         emissive: emissiveColor,
-        emissiveIntensity: isEnemy ? 0.45 : 0.1
+        emissiveIntensity: isEnemy ? 0.5 : 0.1
       });
 
       // 1. Faceless Smooth Head
@@ -1453,6 +1552,7 @@
 
       let swordMesh = null;
       let swordTrail = null;
+      let shieldMesh = null;
 
       // Player gets a Katana / Sword
       if (!isEnemy) {
@@ -1510,13 +1610,103 @@
         swordTrail.rotation.x = -Math.PI / 2;
         swordTrail.position.y = 1.1;
         group.add(swordTrail);
+      } else {
+        // SPECIAL 3D ATTACHMENTS FOR ENEMIES:
+        if (enemyType === 'shield') {
+          // 3D KITE SHIELD FOR SHIELD ENEMY
+          const shieldGroup = new THREE.Group();
+          shieldGroup.position.set(0.12, -0.15, 0.35);
+          shieldGroup.rotation.y = -Math.PI / 2;
+
+          // Main Shield Plate
+          const plateGeo = new THREE.BoxGeometry(0.72, 1.05, 0.09);
+          const plateMat = new THREE.MeshStandardMaterial({
+            color: 0x1e3a8a,
+            emissive: 0x2563eb,
+            emissiveIntensity: 0.4,
+            metalness: 0.85,
+            roughness: 0.25
+          });
+          const plate = new THREE.Mesh(plateGeo, plateMat);
+          plate.castShadow = true;
+          shieldGroup.add(plate);
+
+          // Steel Border Rim
+          const rimGeo = new THREE.BoxGeometry(0.76, 1.09, 0.05);
+          const rimMat = new THREE.MeshStandardMaterial({
+            color: 0xcbd5e1,
+            metalness: 0.95,
+            roughness: 0.15
+          });
+          const rim = new THREE.Mesh(rimGeo, rimMat);
+          shieldGroup.add(rim);
+
+          // Glowing Center Crest
+          const crestGeo = new THREE.SphereGeometry(0.15, 14, 14);
+          crestGeo.scale(1, 1, 0.4);
+          const crestMat = new THREE.MeshStandardMaterial({
+            color: 0x38bdf8,
+            emissive: 0x38bdf8,
+            emissiveIntensity: 1.0,
+            metalness: 0.9
+          });
+          const crest = new THREE.Mesh(crestGeo, crestMat);
+          crest.position.z = 0.05;
+          shieldGroup.add(crest);
+
+          leftArm.add(shieldGroup);
+          shieldMesh = shieldGroup;
+
+        } else if (enemyType === 'healer') {
+          // GLOWING EMERALD ORB FOR HEALER
+          const orbGroup = new THREE.Group();
+          orbGroup.position.set(0, -0.55, 0.2);
+
+          const orbGeo = new THREE.SphereGeometry(0.22, 16, 16);
+          const orbMat = new THREE.MeshStandardMaterial({
+            color: 0x10b981,
+            emissive: 0x34d399,
+            emissiveIntensity: 1.4,
+            roughness: 0.1,
+            metalness: 0.5
+          });
+          const orb = new THREE.Mesh(orbGeo, orbMat);
+          orbGroup.add(orb);
+
+          const orbLight = new THREE.PointLight(0x34d399, 1.2, 4.5);
+          orbGroup.add(orbLight);
+
+          rightArmPivot.add(orbGroup);
+
+        } else if (enemyType === 'assassin') {
+          // DUAL SHADOW DAGGERS FOR ASSASSIN
+          const daggerGeo = new THREE.BoxGeometry(0.045, 0.65, 0.02);
+          const daggerMat = new THREE.MeshStandardMaterial({
+            color: 0xc084fc,
+            emissive: 0xa855f7,
+            emissiveIntensity: 1.2,
+            metalness: 0.9
+          });
+
+          // Right Hand Dagger
+          const rightDag = new THREE.Mesh(daggerGeo, daggerMat);
+          rightDag.position.set(0, -0.55, 0.15);
+          rightDag.rotation.x = Math.PI / 2.2;
+          rightArmPivot.add(rightDag);
+
+          // Left Hand Dagger
+          const leftDag = new THREE.Mesh(daggerGeo, daggerMat);
+          leftDag.position.set(0, -0.4, 0.15);
+          leftDag.rotation.x = Math.PI / 2.2;
+          leftArm.add(leftDag);
+        }
       }
 
-      // Health bar sprite for enemies
+      // Health bar sprite for enemies with Hebrew Name Tag
       let healthBar = null;
       if (isEnemy) {
-        healthBar = createEnemyHealthSprite();
-        healthBar.position.y = 2.6;
+        healthBar = createEnemyHealthSprite(cfg.badge, cfg.textColor, initialHp, initialHp);
+        healthBar.position.y = 2.7;
         group.add(healthBar);
       }
 
@@ -1530,55 +1720,77 @@
         rightArmPivot,
         swordMesh,
         swordTrail,
+        shieldMesh,
         healthBar
       };
     }
 
-    // Floating HP Bar for Enemies
-    function createEnemyHealthSprite() {
+    // Floating HP Bar & Name Tag for Enemies
+    function createEnemyHealthSprite(badgeText, textColor, currentHp, maxHp) {
       const canvas = document.createElement('canvas');
-      canvas.width = 128;
-      canvas.height = 20;
+      canvas.width = 160;
+      canvas.height = 44;
       const ctx = canvas.getContext('2d');
-      updateHealthCanvas(ctx, 30, 30);
+      updateHealthCanvas(ctx, currentHp, maxHp, badgeText, textColor);
 
       const texture = new THREE.CanvasTexture(canvas);
       const spriteMat = new THREE.SpriteMaterial({ map: texture, transparent: true });
       const sprite = new THREE.Sprite(spriteMat);
-      sprite.scale.set(1.4, 0.22, 1);
-      sprite.userData = { canvas, ctx, texture };
+      sprite.scale.set(1.65, 0.45, 1);
+      sprite.userData = { canvas, ctx, texture, badgeText, textColor };
       return sprite;
     }
 
-    function updateHealthCanvas(ctx, currentHp, maxHp) {
-      ctx.clearRect(0, 0, 128, 20);
-      // Background
-      ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
-      ctx.roundRect ? ctx.roundRect(0, 0, 128, 20, 6) : ctx.rect(0, 0, 128, 20);
+    function updateHealthCanvas(ctx, currentHp, maxHp, badgeText = 'לוחם', textColor = '#ef4444') {
+      ctx.clearRect(0, 0, 160, 44);
+
+      // 1. Enemy Name Tag at the top
+      ctx.font = 'bold 15px "Segoe UI", sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'top';
+      // Outline/Shadow
+      ctx.fillStyle = '#000000';
+      ctx.fillText(badgeText, 81, 2);
+      ctx.fillText(badgeText, 79, 2);
+      ctx.fillText(badgeText, 80, 3);
+      // Colored Name
+      ctx.fillStyle = textColor;
+      ctx.fillText(badgeText, 80, 1);
+
+      // 2. HP Bar Background
+      const barY = 22;
+      const barH = 14;
+      const barW = 150;
+      const barX = 5;
+      ctx.fillStyle = 'rgba(10, 15, 25, 0.88)';
+      ctx.roundRect ? ctx.roundRect(barX, barY, barW, barH, 4) : ctx.rect(barX, barY, barW, barH);
       ctx.fill();
 
       // Border
-      ctx.strokeStyle = 'rgba(255, 255, 255, 0.3)';
-      ctx.lineWidth = 2;
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.35)';
+      ctx.lineWidth = 1.5;
       ctx.stroke();
 
       // Fill
       const ratio = Math.max(0, currentHp / maxHp);
-      ctx.fillStyle = '#ef4444';
+      ctx.fillStyle = textColor;
       if (ratio > 0) {
+        const fillW = Math.max(2, (barW - 4) * ratio);
         if (ctx.roundRect) {
           ctx.beginPath();
-          ctx.roundRect(2, 2, (128 - 4) * ratio, 16, 4);
+          ctx.roundRect(barX + 2, barY + 2, fillW, barH - 4, 3);
           ctx.fill();
         } else {
-          ctx.fillRect(2, 2, (128 - 4) * ratio, 16);
+          ctx.fillRect(barX + 2, barY + 2, fillW, barH - 4);
         }
       }
 
-      // 3 Tick segments (for 30 HP / 10 damage per hit)
-      ctx.fillStyle = 'rgba(0, 0, 0, 0.6)';
-      ctx.fillRect(42, 2, 2, 16);
-      ctx.fillRect(84, 2, 2, 16);
+      // HP text (e.g. 45 / 45)
+      ctx.font = 'bold 10px "Segoe UI", sans-serif';
+      ctx.fillStyle = '#ffffff';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText(`${Math.ceil(currentHp)} / ${Math.ceil(maxHp)}`, 80, barY + barH / 2);
     }
 
     // Initialize Player
@@ -1661,10 +1873,84 @@
     }
 
     /* =========================================================
-       ENEMY LOGIC & WAVE MANAGER
+       ENEMY LOGIC, WAVE MANAGER & HEALING BEAM ENGINE
        ========================================================= */
-    function spawnEnemy() {
-      const enemyModel = createFacelessHumanoid(true);
+    function createBeamMesh() {
+      const geo = new THREE.CylinderGeometry(0.065, 0.065, 1, 8);
+      const mat = new THREE.MeshBasicMaterial({
+        color: 0x22c55e,
+        transparent: true,
+        opacity: 0.85,
+        blending: THREE.AdditiveBlending
+      });
+      const mesh = new THREE.Mesh(geo, mat);
+      mesh.visible = false;
+      scene.add(mesh);
+      return mesh;
+    }
+
+    function updateBeam(beam, fromPos, toPos) {
+      beam.visible = true;
+      const start = fromPos.clone();
+      start.y += 1.35; // chest/orb height
+      const end = toPos.clone();
+      end.y += 1.35;
+
+      const dist = start.distanceTo(end);
+      beam.scale.set(1, Math.max(0.1, dist), 1);
+      beam.position.copy(start).add(end).multiplyScalar(0.5);
+
+      const dir = new THREE.Vector3().subVectors(end, start).normalize();
+      const up = new THREE.Vector3(0, 1, 0);
+      beam.quaternion.setFromUnitVectors(up, dir);
+    }
+
+    function cleanAllHealBeams() {
+      Game.enemies.forEach(e => {
+        if (e.beams) {
+          e.beams.forEach(b => {
+            b.visible = false;
+            scene.remove(b);
+          });
+          e.beams = [];
+        }
+      });
+    }
+
+    function spawnEnemy(forcedType = null) {
+      let type = 'warrior';
+      if (forcedType) {
+        type = forcedType;
+      } else {
+        const wave = Game.wave;
+        const rand = Math.random();
+        if (wave === 1) {
+          // Wave 1: Pure warriors
+          type = 'warrior';
+        } else if (wave === 2) {
+          // Wave 2: Introduce Shield Guards (40% chance)
+          type = rand < 0.40 ? 'shield' : 'warrior';
+        } else if (wave === 3) {
+          // Wave 3: Introduce Healers (30% shield, 35% healer, 35% warrior)
+          if (rand < 0.30) type = 'shield';
+          else if (rand < 0.65) type = 'healer';
+          else type = 'warrior';
+        } else {
+          // Wave 4+: Full mix including Assassins, Shield Guards, Healers, and Warriors
+          if (rand < 0.28) type = 'shield';
+          else if (rand < 0.52) type = 'assassin';
+          else if (rand < 0.72) type = 'healer';
+          else type = 'warrior';
+        }
+      }
+
+      const cfg = ENEMY_TYPES[type] || ENEMY_TYPES.warrior;
+      // "שלאט לאט איך שגדלים הגלים אז גם לאדומים יש יותר חיים"
+      const waveBonusHp = (Game.wave - 1) * cfg.hpGrowth;
+      const maxHp = cfg.baseHp + waveBonusHp;
+
+      const enemyModel = createFacelessHumanoid(true, type, maxHp);
+
       // Spawn at random perimeter of arena
       const angle = Math.random() * Math.PI * 2;
       const distance = CONFIG.ARENA_RADIUS * 0.8 + Math.random() * (CONFIG.ARENA_RADIUS * 0.15);
@@ -1675,13 +1961,20 @@
       scene.add(enemyModel.mesh);
 
       const enemy = {
+        type: type,
+        cfg: cfg,
         model: enemyModel,
-        hp: CONFIG.ENEMY_MAX_HP,
-        maxHp: CONFIG.ENEMY_MAX_HP,
-        speed: (3.4 + Math.min(Game.wave * 0.25, 2.5)) * 1.15, // +15% faster red enemies
+        hp: maxHp,
+        maxHp: maxHp,
+        speed: (cfg.baseSpeed + Math.min(Game.wave * 0.22, 2.2)) * 1.15,
         attackCooldown: 0, // ready to strike immediately upon reaching player!
         isDead: false,
-        punchAnimationTime: 0
+        punchAnimationTime: 0,
+        // Assassin specific:
+        teleportCooldown: 2.2 + Math.random() * 2.0,
+        // Healer specific:
+        healTimer: 0,
+        beams: []
       };
       Game.enemies.push(enemy);
     }
@@ -1689,6 +1982,9 @@
     function startWave(waveNum) {
       Game.wave = waveNum;
       document.getElementById('wave-display').textContent = waveNum;
+
+      // Clean existing beams
+      cleanAllHealBeams();
 
       // Wave calculation: wave 1 = 3 enemies, wave 2 = 5, wave 3 = 8, etc.
       const enemiesToSpawn = 2 + waveNum * 2;
@@ -1698,13 +1994,26 @@
             spawnEnemy();
             updateEnemyCountUI();
           }
-        }, i * 350); // slight staggered spawn
+        }, i * 320); // slight staggered spawn
       }
 
       updateEnemyCountUI();
       SoundEngine.playWaveFanfare();
 
-      showBanner(`גל ${waveNum} מתחיל!`, `התמודד מול ${enemiesToSpawn} אויבים אדומים!`);
+      let bannerTitle = `גל ${waveNum} מתחיל!`;
+      let bannerSub = `התמודד מול ${enemiesToSpawn} אויבים!`;
+      if (waveNum === 1) {
+        bannerSub = `לוחמים תוקפים! (החיים עולים בכל גל)`;
+      } else if (waveNum === 2) {
+        bannerSub = `🛡️ שומרי מגן הגיעו! (הכה אותם רק מאחור!)`;
+      } else if (waveNum === 3) {
+        bannerSub = `💚 מרפאים יורים קרן אור ירוקה ומרפאים!`;
+      } else if (waveNum === 4) {
+        bannerSub = `⚡ מתנקשים משתגרים! היזהר מהתקפות פתע!`;
+      } else {
+        bannerSub = `הקרב מתעצם! כל האויבים המיוחדים בזירה!`;
+      }
+      showBanner(bannerTitle, bannerSub);
     }
 
     function updateEnemyCountUI() {
@@ -1719,7 +2028,7 @@
       banner.classList.add('active');
       setTimeout(() => {
         banner.classList.remove('active');
-      }, 2200);
+      }, 2400);
     }
 
     /* =========================================================
@@ -1734,7 +2043,6 @@
       Game.attackCooldownTimer = CONFIG.ATTACK_COOLDOWN;
 
       // 1. Trigger Slow Motion for 1.0 Real Second!
-      // "ותעשה שכל פעם מתי שאני עושה את המכה שלי עם החרב אז המכה הופכת להילוך איטי ל1 שניות"
       Game.slowMoActive = true;
       Game.slowMoTimer = 0;
       Game.timeScale = CONFIG.SLOWMO_TIMESCALE;
@@ -1776,18 +2084,39 @@
 
           // 360 DEGREE ABILITY: Hits ALL enemies in 360 degrees around the warrior!
           if (has360 || angle < CONFIG.SWORD_ARC / 2 || dist < 1.4) {
+
+            // SPECIAL CHECK FOR SHIELD ENEMY:
+            // "גם יש אדומים עם מגן שאתה חייב לפגוע בהם מאחורה כדאי שירד להם נזק ואפילו מכה 360 לא עוזרת"
+            if (enemy.type === 'shield') {
+              const enemyForward = new THREE.Vector3(0, 0, 1).applyAxisAngle(new THREE.Vector3(0, 1, 0), enemy.model.mesh.rotation.y);
+              const toPlayer = new THREE.Vector3().subVectors(playerPos, enemyPos).normalize();
+              const dot = enemyForward.dot(toPlayer);
+
+              // If player is in front of the shield enemy, shield blocks completely!
+              if (dot >= -0.2) {
+                SoundEngine.playShieldBlock();
+                spawnHitParticles(enemyPos, 0x38bdf8, 14); // Cyan shield sparks
+                spawnDamageText(enemyPos, '🛡️ נחסם!', false, '#60a5fa');
+                return; // Blocks 100% of damage! Even with 360 whirlwind!
+              }
+            }
+
             // HIT CONFIRMED!
             hitAny = true;
             enemy.hp -= CONFIG.PLAYER_DAMAGE;
 
             // Update Enemy HP Canvas
             const data = enemy.model.healthBar.userData;
-            updateHealthCanvas(data.ctx, enemy.hp, enemy.maxHp);
+            updateHealthCanvas(data.ctx, enemy.hp, enemy.maxHp, data.badgeText, data.textColor);
             data.texture.needsUpdate = true;
 
             // Effects
             SoundEngine.playHitEnemy();
-            spawnDamageText(enemyPos, CONFIG.PLAYER_DAMAGE, false);
+            if (enemy.type === 'shield') {
+              spawnDamageText(enemyPos, `-${CONFIG.PLAYER_DAMAGE} מאחור!`, false, '#38bdf8');
+            } else {
+              spawnDamageText(enemyPos, CONFIG.PLAYER_DAMAGE, false);
+            }
             // No knockback: enemies do not fly backwards on hit
 
             // Check if enemy defeated
@@ -1796,7 +2125,14 @@
               Game.totalKills++;
               Game.sessionKills++;
               SoundEngine.playEnemyDefeat();
-              spawnHitParticles(enemyPos, 0xff2222, 35);
+              spawnHitParticles(enemyPos, enemy.cfg ? enemy.cfg.color : 0xff2222, 35);
+              if (enemy.beams) {
+                enemy.beams.forEach(b => {
+                  b.visible = false;
+                  scene.remove(b);
+                });
+                enemy.beams = [];
+              }
               scene.remove(enemy.model.mesh);
 
               // 10 GOLD COINS FOR EVERY ENEMY DEFEATED!
@@ -1883,8 +2219,13 @@
     function restartGame() {
       // Clear session coins
       Game.sessionCoins = 0;
+      // Clean heal beams
+      cleanAllHealBeams();
       // Clear enemies
-      Game.enemies.forEach(e => scene.remove(e.model.mesh));
+      Game.enemies.forEach(e => {
+        if (e.beams) e.beams.forEach(b => { b.visible = false; scene.remove(b); });
+        scene.remove(e.model.mesh);
+      });
       Game.enemies = [];
 
       // Clear particles
@@ -2285,47 +2626,157 @@
 
     function updateEnemies(dt) {
       const playerPos = playerModel.mesh.position;
+      const aliveEnemies = Game.enemies.filter(e => !e.isDead);
 
-      // 1. Individual Enemy AI: Movement & Fast Attacks
+      // 1. Individual Enemy AI: Movement, Abilities & Attacks
       Game.enemies.forEach(enemy => {
         if (enemy.isDead) return;
         const mesh = enemy.model.mesh;
         const distToPlayer = mesh.position.distanceTo(playerPos);
 
-        // Look at player
         const dx = playerPos.x - mesh.position.x;
         const dz = playerPos.z - mesh.position.z;
-        mesh.rotation.y = Math.atan2(dx, dz);
+        const targetRot = Math.atan2(dx, dz);
 
-        // Decrease attack cooldown continuously so attack is instantly ready upon reaching player
+        // Rotation:
+        // Shield enemies rotate smoothly so skilled players can circle around to their back!
+        if (enemy.type === 'shield') {
+          const diff = Math.atan2(Math.sin(targetRot - mesh.rotation.y), Math.cos(targetRot - mesh.rotation.y));
+          mesh.rotation.y += diff * Math.min(1.0, dt * 2.8);
+        } else {
+          mesh.rotation.y = targetRot;
+        }
+
+        // Decrease attack cooldown
         if (enemy.attackCooldown > 0) {
           enemy.attackCooldown -= dt;
         }
 
-        // Move towards player if not in melee striking range
-        if (distToPlayer > 1.8) {
-          const moveDir = new THREE.Vector3(dx, 0, dz).normalize();
-          mesh.position.addScaledVector(moveDir, enemy.speed * dt);
+        // --- ENEMY TYPE SPECIFIC BEHAVIORS ---
+        if (enemy.type === 'healer') {
+          // HEALER: "הם לא תוקפים אלה יורים קרן אור ירוקה על חברי הקבוצה שלהם ומרפאה 2 אנשים ב5 אחוז מהחיים כל שנייה"
+          // Healers NEVER attack the player!
+          enemy.attackCooldown = 9999;
 
-          // Enemy walking leg animation
-          const walkPhase = Date.now() * 0.015;
-          enemy.model.leftLeg.rotation.x = Math.sin(walkPhase) * 0.55;
-          enemy.model.rightLeg.rotation.x = -Math.sin(walkPhase) * 0.55;
-        } else {
-          // In range: punch player immediately and attack faster!
-          if (enemy.attackCooldown <= 0) {
-            enemy.attackCooldown = 0.55 + Math.random() * 0.25; // much faster attack cooldown (~0.65s)
-            enemy.punchAnimationTime = 0.2; // faster punch animation
-            damagePlayer(CONFIG.ENEMY_DAMAGE); // 10 damage to player
+          // Movement: Keep distance from player (flee if player gets closer than 7.5 units)
+          if (distToPlayer < 7.5) {
+            const fleeDir = new THREE.Vector3(-dx, 0, -dz).normalize();
+            mesh.position.addScaledVector(fleeDir, enemy.speed * dt);
+          } else if (distToPlayer > 18.0) {
+            // Re-approach if too far from arena
+            const moveDir = new THREE.Vector3(dx, 0, dz).normalize();
+            mesh.position.addScaledVector(moveDir, enemy.speed * 0.7 * dt);
           }
-        }
 
-        // Enemy punch animation
-        if (enemy.punchAnimationTime > 0) {
-          enemy.punchAnimationTime -= dt;
-          enemy.model.rightArmPivot.rotation.x = -Math.sin((enemy.punchAnimationTime / 0.2) * Math.PI) * 1.6;
+          // Leg walking animation
+          const walkPhase = Date.now() * 0.015;
+          enemy.model.leftLeg.rotation.x = Math.sin(walkPhase) * 0.45;
+          enemy.model.rightLeg.rotation.x = -Math.sin(walkPhase) * 0.45;
+
+          // Find up to 2 alive allies (other enemies, not self)
+          const potentialAllies = aliveEnemies.filter(e => e !== enemy && !e.isDead);
+          // Prioritize allies who lost HP
+          potentialAllies.sort((a, b) => (a.hp / a.maxHp) - (b.hp / b.maxHp));
+          const targetAllies = potentialAllies.slice(0, 2);
+
+          // Manage healer's 2 visual beams
+          if (!enemy.beams) enemy.beams = [];
+          while (enemy.beams.length < 2) {
+            enemy.beams.push(createBeamMesh());
+          }
+
+          // Update beams
+          targetAllies.forEach((ally, idx) => {
+            updateBeam(enemy.beams[idx], mesh.position, ally.model.mesh.position);
+          });
+          // Hide unused beams if less than 2 allies exist
+          for (let i = targetAllies.length; i < enemy.beams.length; i++) {
+            enemy.beams[i].visible = false;
+          }
+
+          // Healing tick: 5% of max HP every second!
+          enemy.healTimer = (enemy.healTimer || 0) + dt;
+          if (enemy.healTimer >= 1.0 && targetAllies.length > 0) {
+            enemy.healTimer = 0;
+            let healedAny = false;
+            targetAllies.forEach(ally => {
+              if (ally.hp < ally.maxHp) {
+                const healAmt = Math.max(2, Math.ceil(ally.maxHp * 0.05));
+                ally.hp = Math.min(ally.maxHp, ally.hp + healAmt);
+                const aData = ally.model.healthBar.userData;
+                updateHealthCanvas(aData.ctx, ally.hp, ally.maxHp, aData.badgeText, aData.textColor);
+                aData.texture.needsUpdate = true;
+
+                spawnDamageText(ally.model.mesh.position, `+${healAmt} HP`, false, '#22c55e');
+                spawnHitParticles(ally.model.mesh.position, 0x22c55e, 8);
+                healedAny = true;
+              }
+            });
+            if (healedAny) {
+              SoundEngine.playHeal();
+            }
+          }
+
         } else {
-          enemy.model.rightArmPivot.rotation.x = THREE.MathUtils.lerp(enemy.model.rightArmPivot.rotation.x, 0, 0.25);
+          // COMBAT ENEMIES (Warrior, Shield, Assassin)
+
+          // Assassin Teleport mechanic:
+          if (enemy.type === 'assassin') {
+            enemy.teleportCooldown -= dt;
+            if (enemy.teleportCooldown <= 0 && distToPlayer > 3.0 && !Game.isGameOver) {
+              enemy.teleportCooldown = 4.2 + Math.random() * 1.8;
+
+              // Departure smoke effect
+              spawnHitParticles(mesh.position, 0xa855f7, 16);
+              SoundEngine.playTeleport();
+
+              // Teleport directly behind the player!
+              const playerForward = new THREE.Vector3(0, 0, 1).applyAxisAngle(new THREE.Vector3(0, 1, 0), playerModel.mesh.rotation.y);
+              const targetPos = playerPos.clone().sub(playerForward.clone().multiplyScalar(1.6));
+              targetPos.x += (Math.random() - 0.5) * 0.6;
+              targetPos.z += (Math.random() - 0.5) * 0.6;
+
+              // Arena clamp
+              const maxR = CONFIG.ARENA_RADIUS - 1.5;
+              if (targetPos.length() > maxR) targetPos.normalize().multiplyScalar(maxR);
+
+              mesh.position.copy(targetPos);
+
+              // Arrival flash & indicator
+              spawnHitParticles(mesh.position, 0xc084fc, 22);
+              spawnDamageText(mesh.position, '⚡ השתגרות!', false, '#c084fc');
+
+              // Face player and ready quick strike!
+              mesh.rotation.y = Math.atan2(playerPos.x - mesh.position.x, playerPos.z - mesh.position.z);
+              enemy.attackCooldown = 0.2;
+            }
+          }
+
+          // Movement towards player
+          if (distToPlayer > 1.8) {
+            const moveDir = new THREE.Vector3(dx, 0, dz).normalize();
+            mesh.position.addScaledVector(moveDir, enemy.speed * dt);
+
+            // Walking leg animation
+            const walkPhase = Date.now() * 0.015;
+            enemy.model.leftLeg.rotation.x = Math.sin(walkPhase) * 0.55;
+            enemy.model.rightLeg.rotation.x = -Math.sin(walkPhase) * 0.55;
+          } else {
+            // In melee range: punch player immediately and attack faster!
+            if (enemy.attackCooldown <= 0) {
+              enemy.attackCooldown = 0.55 + Math.random() * 0.25;
+              enemy.punchAnimationTime = 0.2;
+              damagePlayer(CONFIG.ENEMY_DAMAGE);
+            }
+          }
+
+          // Punch animation
+          if (enemy.punchAnimationTime > 0) {
+            enemy.punchAnimationTime -= dt;
+            enemy.model.rightArmPivot.rotation.x = -Math.sin((enemy.punchAnimationTime / 0.2) * Math.PI) * 1.6;
+          } else {
+            enemy.model.rightArmPivot.rotation.x = THREE.MathUtils.lerp(enemy.model.rightArmPivot.rotation.x, 0, 0.25);
+          }
         }
       });
 
